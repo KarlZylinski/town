@@ -1,7 +1,5 @@
 require "class"
-require "human/human"
-require "human/sleep"
-require "human/awake"
+require "world"
 
 current_tick = 0
 
@@ -24,29 +22,19 @@ function enter_state(state, data)
     state:enter()
 end
 
-function tick(humans)
-    for _, human in ipairs(humans) do
-        human:tick()
-    end
-
-    current_tick = current_tick + 1
-end
-
 math.randomseed(os.time())
-local time_multiplier = 10000
+local world = World()
+local time_multiplier = 100
 local time_last_tick = os.clock()
-local humans = { Human() }
-
-for _, human in ipairs(humans) do
-    human:start()
-end
+world:start()
 
 while true do
     local current_time = os.clock()
 
     if current_time - time_last_tick > 1/time_multiplier then
+        world:tick()
+        world:draw()
         time_last_tick = current_time
-        tick(humans)
     end
 end
 

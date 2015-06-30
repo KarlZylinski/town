@@ -1,3 +1,5 @@
+require "human/awake"
+
 Human = class(Human)
 
 function Human:init()

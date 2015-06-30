@@ -1,3 +1,5 @@
+require "human/sleep"
+
 HumanAwakeState = class(HumanAwakeState)
 
 function HumanAwakeState:enter()
@@ -12,7 +14,7 @@ function HumanAwakeState:tick()
         return HumanSleepState()
     end
 
-    normal_day_length = 6120
+    normal_day_length = 61200
     self.data.sleepiness = self.data.sleepiness + 1 / normal_day_length
     return self
 end
