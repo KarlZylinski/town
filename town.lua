@@ -1,5 +1,5 @@
---require "class"
---require "world"
+require "class"
+require "world"
 
 local path = "pvx.dll"
 assert(package.loadlib(path, "pvx_load"))()
@@ -12,17 +12,13 @@ local shape = pvx_add_shape(1, 0, 0, {
     0, 100
 })
 
-while pvx_is_window_open() do
-    pvx_process_events()
-    pvx_clear()
-    pvx_draw_shape(shape, 50, 100)
-    pvx_draw_shape(shape, 20, 50)
-    pvx_flip()
-end
+local shape2 = pvx_add_shape(1, 0, 1, {
+    0, 0,
+    100, 0,
+    100, 100,
+    0, 100
+})
 
-pvx_deinit()
-
---[[
 current_tick = 0
 
 function tick_state(state, data)
@@ -50,15 +46,18 @@ local time_multiplier = 100
 local time_last_tick = os.clock()
 world:start()
 
-while true do
+while pvx_is_window_open() do
     local current_time = os.clock()
 
     if current_time - time_last_tick > 1/time_multiplier then
+        pvx_process_events()
+        pvx_clear()
         world:tick()
         world:draw()
         time_last_tick = current_time
+        pvx_draw_shape(shape2, 50, 50)
+        pvx_flip()
     end
 end
 
-]]
-
+pvx_deinit()
