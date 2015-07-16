@@ -1,6 +1,29 @@
-require "class"
-require "world"
+--require "class"
+--require "world"
 
+local path = "pvx.dll"
+assert(package.loadlib(path, "pvx_load"))()
+
+pvx_init("StadKul", 800, 600)
+
+local shape = pvx_add_shape(1, 0, 0, {
+    0.3, 0,
+    0.6, -0.1,
+    0.4, -0.2,
+    0.6, -0.3,
+    0, -1
+})
+
+while pvx_is_window_open() do
+    pvx_process_events()
+    pvx_clear()
+    pvx_draw_shape(shape)
+    pvx_flip()
+end
+
+pvx_deinit()
+
+--[[
 current_tick = 0
 
 function tick_state(state, data)
@@ -37,4 +60,6 @@ while true do
         time_last_tick = current_time
     end
 end
+
+]]
 
