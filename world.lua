@@ -3,15 +3,62 @@ require "house"
 
 World = class(World)
 
+local world_width = 20000
+local world_height = 20000
+local houses_per_unit = 0.08
+
 function generate_world()
     local entities = {}
 
-    for i=1, 5 do
-        local house = House()
-        local x, y = math.random(1, 80), math.random(1, 25)
-        house:set_position(x, y)
-        table.insert(entities, house)
+    for i=1, world_width * houses_per_unit do
+        function find_free_ran_pos(w, h)
+            function rand_bounds()
+                local x, y = math.random(-world_width/2, world_width/2), math.random(-world_height/2, world_height/2)
+                local left, top = x - w/2 * bs, y - h * bs
+                local right, bottom = x + w/2 * bs, y + bs
+
+                local bounds = {
+                    left = left, top = top, right = right, bottom = bottom
+                }
+
+                return bounds, x, y
+            end
+
+            local bounds, x, y = rand_bounds()
+
+            for i=1,10 do
+                local free = true
+                
+                for _, entity in ipairs(entities) do
+                    if entity.bounds ~= nil then
+                        if bounds_intersect(bounds, entity.bounds) then
+                            bounds, x, y = rand_bounds()
+                            free = false
+                            break
+                        end
+                    end
+                end
+
+                if free == true then
+                    return x, y
+                end
+            end
+
+            return nil
+        end
+
+        local w, h = math.random(4,10), math.random(3, 6)
+        local x, y = find_free_ran_pos(w, h)
+
+        if x ~= nil and y ~= nil then
+            local house = House(x, y, w, h)
+            table.insert(entities, house)
+        end
     end
+
+    table.sort(entities, function(e1, e2)
+        return e1.y < e2.y
+    end)
 
     return entities
 end
@@ -43,39 +90,9 @@ function replace_char(pos, str, r)
 end
 
 function World:draw()
-    os.execute("cls")
-    local screen = ""
-    width = 80
-    height = 25
-    
-    for i = 1, width * height do
-        screen = screen .. " "
-    end
-
     for _, entity in ipairs(self.entities) do
-        if entity.art ~= nil and entity.position ~= nil then
-            local world_x, world_y = entity:position()
-            local w, h = entity:size()
-            local art = entity:art()
-            local r = 0
-            local x = 0
-            local y = 0
-
-            for i = 1, #art do
-                local c = art:sub(i, i)
-
-                if c == '\n' then
-                    r = r + 1
-                    y = y + 1
-                    x = 0
-                else
-                    x = x + 1
-                    local pos = (world_y + y) * width + x + world_x
-                    screen = replace_char(pos, screen, c)
-                end
-            end
+        if entity.draw ~= nil then
+            entity:draw()
         end
     end
-
-    print(screen)
 end
