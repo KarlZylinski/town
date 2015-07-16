@@ -3,21 +3,20 @@
 
 local path = "pvx.dll"
 assert(package.loadlib(path, "pvx_load"))()
-
 pvx_init("StadKul", 800, 600)
 
 local shape = pvx_add_shape(1, 0, 0, {
-    0.3, 0,
-    0.6, -0.1,
-    0.4, -0.2,
-    0.6, -0.3,
-    0, -1
+    0, 0,
+    100, 0,
+    100, 100,
+    0, 100
 })
 
 while pvx_is_window_open() do
     pvx_process_events()
     pvx_clear()
-    pvx_draw_shape(shape)
+    pvx_draw_shape(shape, 50, 100)
+    pvx_draw_shape(shape, 20, 50)
     pvx_flip()
 end
 
