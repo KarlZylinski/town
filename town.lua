@@ -52,10 +52,8 @@ while pvx_is_window_open() do
     if current_time - time_last_tick > 1/time_multiplier then
         pvx_process_events()
         pvx_clear()
-        world:tick()
-        world:draw()
         time_last_tick = current_time
-        pvx_draw_shape(shape2, 50, 50)
+        pvx_draw_shape(shape, 50, 50)
         pvx_flip()
     end
 end
