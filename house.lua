@@ -40,8 +40,8 @@ local function static_init()
 
     shapes = {
         wall = pvx_add_shape(0.99, 0.99, 0.94, square),
-        left_side = pvx_add_shape(0.95, 0.1, 0, left_side_square),
-        right_side = pvx_add_shape(0.95, 0.1, 0, right_side_square),
+        left_side = pvx_add_shape(1, 0.325, 0.123, left_side_square),
+        right_side = pvx_add_shape(1, 0.325, 0.123, right_side_square),
         fill_roof = pvx_add_shape(0.4, 0.3, 0.14, square),
         left_side_roof = pvx_add_shape(0.4, 0.3, 0.14, left_side_roof),
         right_side_roof = pvx_add_shape(0.4, 0.3, 0.14, right_side_roof),
@@ -83,6 +83,10 @@ function HouseAct:init(block_size)
             return shapes.fill_roof
         end
 
+        if y < b - 2 then
+            return shapes.fill_roof
+        end
+
         if x == l then
             return shapes.left_side
         end
@@ -103,7 +107,7 @@ function HouseAct:init(block_size)
             return shapes.window
         end
 
-        if w > 5 and (x == self.placements.door_x + 2 or x == self.placements.door_x - 2) and y == b - 1 then
+        if w > 5 and (x == self.placements.door_x + 3 or x == self.placements.door_x - 3) and y == b - 1 and x ~= r - 1 and x ~= l + 1 then
             return shapes.window
         end
 
@@ -127,11 +131,11 @@ function HouseAct:calc_bounds(pos)
 
     for _, block in ipairs(self.blocks) do
         if bounds.left == nil or block.position.x + pos.x < bounds.left then
-            bounds.left = block.position.x + pos.x
+            bounds.left = block.position.x + pos.x + 1
         end
 
         if bounds.top == nil or block.position.y + pos.y < bounds.top then
-            bounds.top = block.position.y + pos.y
+            bounds.top = block.position.y + pos.y + 1
         end
 
         if bounds.right == nil or block.position.x + pos.x + bs > bounds.right then

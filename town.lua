@@ -36,9 +36,6 @@ function bounds_intersect(a, b)
            b.top <= a.bottom
 end
 
-require "entity"
-require "house"
-
 local houses_per_unit = 0.08
 
 function generate_world(size)
@@ -101,7 +98,7 @@ end
 local world_size = Vector2(60, 60)
 
 math.randomseed(os.time())
-grass_color = {r = 0.1, g = 0.51, b = 0.054}
+grass_color = {r = 0.443, g = 0.678, b = 0.169 }
 local main_world = World(generate_world, world_size)
 local time_multiplier = 100
 local time_per_tick = 1/time_multiplier
