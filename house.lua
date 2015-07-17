@@ -159,6 +159,9 @@ function HouseAct:get_size()
     return self.block_size * bs
 end
 
+function HouseAct:get_inside_world_pos()
+end
+
 function HouseAct:start()
     local bounds = self.entity:get_bounds()
     local inside_world_offset = Vector2(bounds.left, bounds.top) - Vector2(bs, 0)
@@ -175,7 +178,7 @@ function HouseAct:draw()
         self.inside_world:draw()
     else
         local x, y = self.entity:get_position():unpack()
-
+        
         for _, block in ipairs(self.blocks) do
             pvx_draw_shape(block.shape, x + block.position.x, y + block.position.y)
         end

@@ -1,9 +1,30 @@
 -- Inside house
 require "wall"
 
+local floor_shape_cache = {}
+
+local function get_or_add_floor_shape(size)
+    local existing = floor_shape_cache[size]
+
+    if existing ~= nil then
+        return existing
+    end
+
+    local shape = {
+        0, 0,
+        size.x * bs, 0,
+        size.x * bs, size.y * bs,
+        0, size.y * bs
+    }
+
+    local handle = pvx_add_shape(0.76, 0.72, 0.67, shape)
+    floor_shape_cache[size] = handle
+    return handle
+end
+
 function generate_house_world(position, placements, shapes, size)
     local entities = {}
-
+    table.insert(entities, Entity(position + Vector2(bs * 2, bs), WallAct(get_or_add_floor_shape(size - Vector2(2, 0)))))
     local l = 1
     local t = 1
     local r = size.x
