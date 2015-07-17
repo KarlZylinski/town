@@ -1,3 +1,5 @@
+require "house_world"
+
 HouseAct = class(HouseAct)
 
 local shapes = {}
@@ -37,7 +39,7 @@ local function static_init()
     }
 
     shapes = {
-        fill = pvx_add_shape(0.99, 0.99, 0.94, square),
+        wall = pvx_add_shape(0.99, 0.99, 0.94, square),
         left_side = pvx_add_shape(0.95, 0.1, 0, left_side_square),
         right_side = pvx_add_shape(0.95, 0.1, 0, right_side_square),
         fill_roof = pvx_add_shape(0.4, 0.3, 0.14, square),
@@ -54,16 +56,20 @@ function HouseAct:init(block_size)
     assert(block_size ~= nil)
     self.block_size = block_size
     self.blocks = {}
+    local h = block_size.y
+
+    self.placements = {
+        door_x = math.random(3, self.block_size.x - 3)
+    }
 
     function get_shape(pos)
         local x = pos.x
         local y = pos.y
         local w = block_size.x
-        local h = block_size.y
-        local l = math.floor(-w/2)
-        local t = -h
-        local r = math.floor(w/2)
-        local b = 0
+        local l = 1
+        local t = 1
+        local r = block_size.x
+        local b = block_size.y
 
         if x == l and y == t then
             return shapes.left_side_roof
@@ -85,7 +91,7 @@ function HouseAct:init(block_size)
             return shapes.right_side
         end
 
-        if (y == b or y == b - 1) and x == 0 then
+        if (y == b or y == b - 1) and x == self.placements.door_x then
             return shapes.door
         end
 
@@ -97,21 +103,20 @@ function HouseAct:init(block_size)
             return shapes.window
         end
 
-        if w > 5 and (x == math.floor(l/2) or x == math.floor(r/2)) and x ~= 1 and x ~= -1
-            and x + 1 ~= r and x - 1 ~= l and y == b + math.floor(t/2) then
+        if w > 5 and (x == self.placements.door_x + 2 or x == self.placements.door_x - 2) and y == b - 1 then
             return shapes.window
         end
 
-        return shapes.fill
+        return shapes.wall
     end
 
-    for x = math.floor(-block_size.x/2), math.floor(block_size.x/2) do
-        for y = -block_size.y, 0 do
+    for x = 1, block_size.x do
+        for y = 1, block_size.y do
             local block_pos = Vector2(x, y)
 
             table.insert(self.blocks, {
                 shape = get_shape(block_pos),
-                position = block_pos * bs
+                position = (block_pos + Vector2(math.floor(-block_size.x/2), -block_size.y)) * bs
             })
         end
     end
@@ -138,6 +143,11 @@ function HouseAct:calc_bounds(pos)
         end
     end
 
+    bounds.left = bounds.left - 1
+    bounds.top = bounds.top - 1
+    bounds.right = bounds.right + 1
+    bounds.bottom = bounds.bottom + 1
+
     return bounds
 end
 
@@ -145,8 +155,25 @@ function HouseAct:get_size()
     return self.block_size * bs
 end
 
-function HouseAct:draw(position)
-    for _, block in ipairs(self.blocks) do
-        pvx_draw_shape(block.shape, position.x + block.position.x, position.y + block.position.y)
+function HouseAct:start()
+    local bounds = self.entity:get_bounds()
+    local inside_world_offset = Vector2(bounds.left, bounds.top) - Vector2(bs, 0)
+    self.inside_world = World(function(size) return generate_house_world(inside_world_offset, self.placements, shapes, size) end, self.block_size + Vector2(0, -1))
+    self.inside_world:start()
+end
+
+function HouseAct:tick()
+    self.inside_world:tick()
+end
+
+function HouseAct:draw()
+    if pvx_key_held("space") then
+        local x, y = self.entity:get_position():unpack()
+
+        for _, block in ipairs(self.blocks) do
+            pvx_draw_shape(block.shape, x + block.position.x, y + block.position.y)
+        end
+    else
+        self.inside_world:draw()
     end
 end

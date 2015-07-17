@@ -19,6 +19,7 @@ function Entity:init(position, act)
     assert(act.calc_bounds ~= nil)
     self.position = position
     self.act = act
+    self.act.entity = self
     self.bounds = self.act:calc_bounds(position)
 end
 
@@ -45,6 +46,14 @@ function Entity:set_position(position)
     self.bounds = self.act:calc_bounds(position)
 end
 
+function Entity:start()
+    if self.act.start == nil then
+        return
+    end
+
+    self.act:start()
+end
+
 function Entity:tick()
     if self.act.tick == nil then
         return
@@ -58,5 +67,5 @@ function Entity:draw()
         return
     end
 
-    self.act:draw(self.position)
+    self.act:draw()
 end
