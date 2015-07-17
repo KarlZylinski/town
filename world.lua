@@ -12,9 +12,7 @@ function World:start()
     end
 
     for _, entity in ipairs(self.entities) do
-        if entity.start ~= nil then
-            entity:start()
-        end
+        entity:start()
     end
 end
 
@@ -24,9 +22,7 @@ function World:tick()
     end
 
     for _, entity in ipairs(self.entities) do
-        if entity.tick ~= nil then
-            entity:tick()
-        end
+        entity:tick()
     end
 
     current_tick = current_tick + 1
@@ -36,10 +32,18 @@ function World:draw()
     if self.entities == nil then
         return
     end
-    
+
     for _, entity in ipairs(self.entities) do
-        if entity.draw ~= nil then
-            entity:draw()
+        entity:draw()
+    end
+end
+
+function World:get_intersecting_entity(pos)
+    for _, entity in ipairs(self.entities) do
+        if entity:contains(pos) then
+            return entity
         end
     end
+
+    return nil
 end

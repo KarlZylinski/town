@@ -37,7 +37,12 @@ end
 
 function Entity:intersects(other)
     assert(other ~= nil)
-    return bounds_intersect(self:bounds(), other:bounds())
+    return bounds_intersect(self:get_bounds(), other:get_bounds())
+end
+
+function Entity:contains(pos)
+    assert(pos ~= nil)
+    return bounds_contains(self:get_bounds(), pos)
 end
 
 function Entity:set_position(position)
@@ -68,4 +73,20 @@ function Entity:draw()
     end
 
     self.act:draw()
+end
+
+function Entity:left_mouse_clicked(pos)
+    if self.act.left_mouse_clicked == nil then
+        return
+    end
+
+    self.act:left_mouse_clicked(pos)
+end
+
+function Entity:right_mouse_clicked(pos)
+    if self.act.right_mouse_clicked == nil then
+        return
+    end
+
+    self.act:right_mouse_clicked(pos)
 end

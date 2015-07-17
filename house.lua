@@ -171,13 +171,21 @@ function HouseAct:tick()
 end
 
 function HouseAct:draw()
-    if pvx_key_held("space") then
+    if self.show_inside then
+        self.inside_world:draw()
+    else
         local x, y = self.entity:get_position():unpack()
 
         for _, block in ipairs(self.blocks) do
             pvx_draw_shape(block.shape, x + block.position.x, y + block.position.y)
         end
-    else
-        self.inside_world:draw()
     end
+end
+
+function HouseAct:left_mouse_clicked(pos)
+    self.show_inside = true
+end
+
+function HouseAct:right_mouse_clicked(pos)
+    self.show_inside = false
 end
