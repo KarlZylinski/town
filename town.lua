@@ -1,11 +1,12 @@
 require "class"
 require "world"
+require "vector2"
 
 local path = "pvx.dll"
 assert(package.loadlib(path, "pvx_load"))()
 pvx_init("StadKul", 800, 600)
 bs = 32
-House.static_init()
+Entity.static_init()
 current_tick = 0
 
 function tick_state(state, data)

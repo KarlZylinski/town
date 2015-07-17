@@ -1,8 +1,8 @@
-House = class(House)
+HouseAct = class(HouseAct)
 
 local shapes = {}
 
-function House.static_init()
+local function static_init()
     local square = {
         0, 0,
         bs, 0,
@@ -48,14 +48,18 @@ function House.static_init()
     }
 end
 
-function House:init(x, y, w, h)
-    self.x = x
-    self.y = y
-    self.w = w
-    self.h = h
+Entity.add_static_init_func(static_init)
+
+function HouseAct:init(block_size)
+    assert(block_size ~= nil)
+    self.block_size = block_size
     self.blocks = {}
 
-    function get_shape(x, y)
+    function get_shape(pos)
+        local x = pos.x
+        local y = pos.y
+        local w = block_size.x
+        local h = block_size.y
         local l = math.floor(-w/2)
         local t = -h
         local r = math.floor(w/2)
@@ -101,69 +105,48 @@ function House:init(x, y, w, h)
         return shapes.fill
     end
 
-    for i = math.floor(-w/2), math.floor(w/2) do
-        for j = -h, 0 do
+    for x = math.floor(-block_size.x/2), math.floor(block_size.x/2) do
+        for y = -block_size.y, 0 do
+            local block_pos = Vector2(x, y)
+
             table.insert(self.blocks, {
-                shape = get_shape(i, j),
-                x = i * bs,
-                y = j * bs
+                shape = get_shape(block_pos),
+                position = block_pos * bs
             })
         end
     end
-
-    self:calc_bounds()
 end
 
-function House:calc_bounds()
-    self.bounds = {}
+function HouseAct:calc_bounds(pos)
+    local bounds = {}
 
     for _, block in ipairs(self.blocks) do
-        if self.bounds.left == nil or block.x + self.x < self.bounds.left then
-            self.bounds.left = block.x + self.x
+        if bounds.left == nil or block.position.x + pos.x < bounds.left then
+            bounds.left = block.position.x + pos.x
         end
 
-        if self.bounds.top == nil or block.y + self.y < self.bounds.top then
-            self.bounds.top = block.y + self.y
+        if bounds.top == nil or block.position.y + pos.y < bounds.top then
+            bounds.top = block.position.y + pos.y
         end
 
-        if self.bounds.right == nil or block.x + self.x + bs > self.bounds.right then
-            self.bounds.right = block.x + self.x + bs
+        if bounds.right == nil or block.position.x + pos.x + bs > bounds.right then
+            bounds.right = block.position.x + pos.x + bs
         end
 
-        if self.bounds.bottom == nil or block.y + self.y + bs > self.bounds.bottom then
-            self.bounds.bottom = block.y + self.y + bs
+        if bounds.bottom == nil or block.position.y + pos.y + bs > bounds.bottom then
+            bounds.bottom = block.position.y + pos.y + bs
         end
     end
+
+    return bounds
 end
 
-function House:art()
-    return house_ascii
+function HouseAct:get_size()
+    return self.block_size * bs
 end
 
-function House:position()
-    return self.x, self.y
-end
-
-function House:size()
-    return self.w * bs, self.h * bs
-end
-
-function House:intersects(ob)
-    if other.bounds == nil then
-        return false
-    end
-
-    return bounds_intersect(self.bounds, other.bounds)
-end
-
-function House:set_position(x, y)
-    self.x = x
-    self.y = y
-    self:calc_bounds()
-end
-
-function House:draw()
+function HouseAct:draw(position)
     for _, block in ipairs(self.blocks) do
-        pvx_draw_shape(block.shape, self.x + block.x, self.y + block.y)
+        pvx_draw_shape(block.shape, position.x + block.position.x, position.y + block.position.y)
     end
 end

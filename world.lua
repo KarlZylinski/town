@@ -1,4 +1,5 @@
 require "human/human"
+require "entity"
 require "house"
 
 World = class(World)
@@ -40,7 +41,7 @@ function generate_world()
                 end
 
                 if free == true then
-                    return x, y
+                    return Vector2(x, y)
                 end
             end
 
@@ -48,16 +49,17 @@ function generate_world()
         end
 
         local w, h = math.random(4,10), math.random(3, 6)
-        local x, y = find_free_ran_pos(w, h)
+        local position = find_free_ran_pos(w, h)
 
-        if x ~= nil and y ~= nil then
-            local house = House(x, y, w, h)
-            table.insert(entities, house)
+        if position ~= nil then
+            local house_act = HouseAct(Vector2(w, h))
+            local entity = Entity(position, house_act)
+            table.insert(entities, entity)
         end
     end
 
     table.sort(entities, function(e1, e2)
-        return e1.y < e2.y
+        return e1:get_position().y < e2:get_position().y
     end)
 
     return entities
