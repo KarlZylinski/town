@@ -22,3 +22,7 @@ function class(klass, super)
     
     return klass
 end
+
+function is(object, klass)
+    return getmetatable(object) == klass
+end

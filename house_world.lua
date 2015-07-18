@@ -22,9 +22,9 @@ local function get_or_add_floor_shape(size)
     return handle
 end
 
-function generate_house_world(position, placements, shapes, size)
+function generate_house_world(position, placements, shapes, size, world)
     local entities = {}
-    table.insert(entities, Entity(position + Vector2(bs * 2, bs), WallAct(get_or_add_floor_shape(size - Vector2(2, 0)))))
+    table.insert(entities, Entity(position + Vector2(bs * 2, bs), WallAct(get_or_add_floor_shape(size - Vector2(2, 0))), world))
     local l = 1
     local t = 1
     local r = size.x
@@ -66,10 +66,17 @@ function generate_house_world(position, placements, shapes, size)
             local shape = get_shape(Vector2(x, y))
 
             if shape ~= nil then
-                table.insert(entities, Entity(position + Vector2(x, y) * bs, WallAct(shape)))
+                table.insert(entities, Entity(position + Vector2(x, y) * bs, WallAct(shape), world))
             end
         end
     end
 
-    return entities
+    local exits = {
+        {
+            position = Vector2(position.x + bs/2 + placements.door_x * bs, position.y + (size.y + 1) * bs),
+            world = main_world
+        }
+    }
+
+    return entities, exits
 end

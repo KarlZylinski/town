@@ -2,6 +2,7 @@ require "class"
 require "world"
 require "vector2"
 require "house"
+require "human/human"
 
 local path = "pvx.dll"
 assert(package.loadlib(path, "pvx_load"))()
@@ -31,6 +32,13 @@ function enter_state(state, data)
     state:enter()
 end
 
+function move_to_world(entity, new_world)
+    assert(new_world ~= nil)
+    assert(entity.world ~= new_world)
+    entity.world:remove_entity(entity)
+    new_world:add_entity(entity)
+end
+
 function bounds_intersect(a, b)
     return a.left <= b.right and
            b.left <= a.right and
@@ -44,8 +52,9 @@ end
 
 local houses_per_unit = 0.08
 
-function generate_world(size)
+function generate_world(size, world)
     local entities = {}
+    local exits = {}
 
     for i=1, size.x * bs * houses_per_unit do
         function find_free_ran_pos(w, h)
@@ -84,12 +93,19 @@ function generate_world(size)
             return nil
         end
 
-        local w, h = math.random(7,60), math.random(5, 12)
+        local w, h = math.random(7,60), math.random(6, 15)
         local position = find_free_ran_pos(w, h)
 
         if position ~= nil then
-            local house_act = HouseAct(Vector2(w, h))
-            local entity = Entity(position, house_act)
+            local house_act = HouseAct(Vector2(w, h), position)
+            local entity = Entity(position, house_act, world)
+            entity:start()
+            local entity_exits = entity:get_exits()
+
+            for _, exit in ipairs(entity_exits) do
+                table.insert(exits, exit)
+            end
+
             table.insert(entities, entity)
         end
     end
@@ -98,20 +114,29 @@ function generate_world(size)
         return e1:get_position().y < e2:get_position().y
     end)
 
-    return entities
+    return entities, exits
 end
 
 local world_size = Vector2(60, 60)
 
 math.randomseed(os.time())
 grass_color = {r = 0.443, g = 0.678, b = 0.169 }
-local main_world = World(generate_world, world_size)
+main_world = World(generate_world, world_size)
 local time_multiplier = 100
 local time_per_tick = 1/time_multiplier
 local camera_move_speed = 2000
 local time_last_tick = os.clock()
 local time_last_frame = os.clock()
 main_world:start()
+
+for _, entity in ipairs(main_world.entities) do
+    if is(entity.act, HouseAct) and entity.act.inside_world ~= nil then
+        local human_act = HumanAct()
+        local human = Entity(entity.act:find_free_location(), human_act, entity.act.inside_world)
+        entity.act.inside_world:add_entity(human)
+    end
+end
+
 local left_button_held_last_frame = false
 local right_button_held_last_frame = false
 local left_button_pressed = false

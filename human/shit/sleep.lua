@@ -8,11 +8,9 @@ function HumanSleepRemState:init()
 end
 
 function HumanSleepRemState:enter()
-    print("entering rem")
 end
 
 function HumanSleepRemState:exit()
-    print("leaving rem")
 end
 
 function HumanSleepRemState:tick()

@@ -12,11 +12,13 @@ function Entity.add_static_init_func(init_func)
     table.insert(Entity.static_init_funcs, init_func)
 end
 
-function Entity:init(position, act)
+function Entity:init(position, act, world)
     assert(position ~= nil)
     assert(act ~= nil)
     assert(act.get_size ~= nil)
     assert(act.calc_bounds ~= nil)
+    assert(world ~= nil)
+    self.world = world
     self.position = position
     self.act = act
     self.act.entity = self
@@ -51,7 +53,17 @@ function Entity:set_position(position)
     self.bounds = self.act:calc_bounds(position)
 end
 
+function Entity:is_blocking()
+    if self.act.is_blocking == nil then
+        return false
+    end
+
+    return self.act:is_blocking()
+end
+
 function Entity:start()
+    self.started = true
+
     if self.act.start == nil then
         return
     end
@@ -89,4 +101,12 @@ function Entity:right_mouse_clicked(pos)
     end
 
     self.act:right_mouse_clicked(pos)
+end
+
+function Entity:get_exits()
+    if self.act.get_exits == nil then
+        return {}
+    end
+
+    return self.act:get_exits()
 end

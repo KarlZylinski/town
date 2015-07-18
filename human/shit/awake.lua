@@ -3,7 +3,6 @@ require "human/sleep"
 HumanAwakeState = class(HumanAwakeState)
 
 function HumanAwakeState:enter()
-    print("woke up")
 end
 
 function HumanAwakeState:exit()

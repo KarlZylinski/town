@@ -56,6 +56,7 @@ function HouseAct:init(block_size)
     assert(block_size ~= nil)
     self.block_size = block_size
     self.blocks = {}
+    self.show_inside = false
     local h = block_size.y
 
     self.placements = {
@@ -151,7 +152,6 @@ function HouseAct:calc_bounds(pos)
     bounds.top = bounds.top - 1
     bounds.right = bounds.right + 1
     bounds.bottom = bounds.bottom + 1
-
     return bounds
 end
 
@@ -159,13 +159,10 @@ function HouseAct:get_size()
     return self.block_size * bs
 end
 
-function HouseAct:get_inside_world_pos()
-end
-
 function HouseAct:start()
     local bounds = self.entity:get_bounds()
     local inside_world_offset = Vector2(bounds.left, bounds.top) - Vector2(bs, 0)
-    self.inside_world = World(function(size) return generate_house_world(inside_world_offset, self.placements, shapes, size) end, self.block_size + Vector2(0, -1))
+    self.inside_world = World(function(size, world) return generate_house_world(inside_world_offset, self.placements, shapes, size, world) end, self.block_size + Vector2(0, -1))
     self.inside_world:start()
 end
 
@@ -178,7 +175,7 @@ function HouseAct:draw()
         self.inside_world:draw()
     else
         local x, y = self.entity:get_position():unpack()
-        
+
         for _, block in ipairs(self.blocks) do
             pvx_draw_shape(block.shape, x + block.position.x, y + block.position.y)
         end
@@ -192,3 +189,41 @@ end
 function HouseAct:right_mouse_clicked(pos)
     self.show_inside = false
 end
+
+function HouseAct:get_exits()
+    local bounds = self.entity:get_bounds()
+
+    return {
+        {
+            position = Vector2(bounds.left - bs/2 + self.placements.door_x * bs, bounds.bottom),
+            world = self.inside_world
+        }
+    }
+end
+
+function HouseAct:find_free_location()
+    local entity_bounds = self.entity:get_bounds()
+
+    while true do
+        local pos = Vector2(math.random(entity_bounds.left + bs * 2, entity_bounds.right - bs * 2), math.random(entity_bounds.top + bs * 2, entity_bounds.bottom - bs * 2))
+        local blocked = false
+
+        for _, block in ipairs(self.blocks) do
+            local bounds = {
+                left = block.position.x + entity_bounds.left,
+                top = block.position.y + entity_bounds.top,
+                right = block.position.x + entity_bounds.left + bs,
+                bottom = block.position.y + entity_bounds.top + bs
+            }
+
+            if bounds_contains(bounds, pos) then
+                blocked = true
+            end
+        end 
+
+        if blocked == false then
+            return pos
+        end
+    end
+end
+
