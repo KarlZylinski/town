@@ -23,6 +23,7 @@ function Entity:init(position, act, world)
     self.act = act
     self.act.entity = self
     self.bounds = self.act:calc_bounds(position)
+    self.started = false
 end
 
 function Entity:get_bounds()
@@ -62,6 +63,10 @@ function Entity:is_blocking()
 end
 
 function Entity:start()
+    if self.started == true then
+        return
+    end
+
     self.started = true
 
     if self.act.start == nil then
@@ -79,12 +84,12 @@ function Entity:tick()
     self.act:tick()
 end
 
-function Entity:draw()
+function Entity:draw(screen_rect)
     if self.act.draw == nil then
         return
     end
 
-    self.act:draw()
+    self.act:draw(screen_rect)
 end
 
 function Entity:left_mouse_clicked(pos)

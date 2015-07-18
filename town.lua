@@ -34,7 +34,7 @@ end
 
 function move_to_world(entity, new_world)
     assert(new_world ~= nil)
-    assert(entity.world ~= new_world)
+    assert(entity.world ~= nil)
     entity.world:remove_entity(entity)
     new_world:add_entity(entity)
 end
@@ -117,11 +117,11 @@ function generate_world(size, world)
     return entities, exits
 end
 
-local world_size = Vector2(60, 60)
+local world_size = Vector2(625, 625)
 
 math.randomseed(os.time())
 grass_color = {r = 0.443, g = 0.678, b = 0.169 }
-main_world = World(generate_world, world_size)
+local main_world = World(generate_world, world_size)
 local time_multiplier = 100
 local time_per_tick = 1/time_multiplier
 local camera_move_speed = 2000
@@ -188,8 +188,15 @@ while pvx_is_window_open() do
         local mouse_pos = Vector2(pvx_mouse_pos())
         local view_size = Vector2(pvx_window_size())
         local view_pos = Vector2(pvx_view_pos())
-        local adjusted_view_pos = view_pos
-        local world_pos = adjusted_view_pos + mouse_pos
+        local world_pos = view_pos + mouse_pos
+        local screet_rect_padding = bs * 4
+
+        local screen_rect = {
+            left = view_pos.x - screet_rect_padding,
+            top = view_pos.y - screet_rect_padding,
+            right = view_pos.x + view_size.x + screet_rect_padding,
+            bottom = view_pos.y + view_size.y + screet_rect_padding
+        }
 
         if left_button_pressed then
             local intersecting_entity = main_world:get_intersecting_entity(world_pos)
@@ -218,7 +225,7 @@ while pvx_is_window_open() do
         pvx_process_events()
         pvx_clear(grass_color.r, grass_color.g, grass_color.b)
         main_world:tick()
-        main_world:draw()
+        main_world:draw(screen_rect)
         time_last_tick = current_time
         pvx_flip()
 

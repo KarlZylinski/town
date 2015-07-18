@@ -162,7 +162,7 @@ end
 function HouseAct:start()
     local bounds = self.entity:get_bounds()
     local inside_world_offset = Vector2(bounds.left, bounds.top) - Vector2(bs, 0)
-    self.inside_world = World(function(size, world) return generate_house_world(inside_world_offset, self.placements, shapes, size, world) end, self.block_size + Vector2(0, -1))
+    self.inside_world = World(function(size, world) return generate_house_world(inside_world_offset, self.placements, shapes, self.entity.world, size, world) end, self.block_size + Vector2(0, -1))
     self.inside_world:start()
 end
 
@@ -170,9 +170,9 @@ function HouseAct:tick()
     self.inside_world:tick()
 end
 
-function HouseAct:draw()
+function HouseAct:draw(screen_rect)
     if self.show_inside then
-        self.inside_world:draw()
+        self.inside_world:draw(screen_rect)
     else
         local x, y = self.entity:get_position():unpack()
 
@@ -192,6 +192,7 @@ end
 
 function HouseAct:get_exits()
     local bounds = self.entity:get_bounds()
+    assert(self.inside_world ~= nil)
 
     return {
         {

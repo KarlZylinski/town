@@ -28,13 +28,21 @@ function World:tick()
     current_tick = current_tick + 1
 end
 
-function World:draw()
+function World:draw(screen_rect)
     if self.entities == nil then
         return
     end
 
+    local entities_on_screen = {}
+
     for _, entity in ipairs(self.entities) do
-        entity:draw()
+        if bounds_intersect(entity:get_bounds(), screen_rect) then
+            table.insert(entities_on_screen, entity)
+        end
+    end
+
+    for _, entity in ipairs(entities_on_screen) do
+        entity:draw(screen_rect)
     end
 end
 
@@ -51,7 +59,7 @@ end
 function World:add_entity(entity)
     table.insert(self.entities, entity)
 
-    if entity.started ~= false then
+    if entity.started == false then
         entity:start()
     end
 
