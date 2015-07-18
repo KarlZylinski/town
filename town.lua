@@ -3,6 +3,7 @@ require "world"
 require "vector2"
 require "house"
 require "human/human"
+require "tree"
 
 local path = "pvx.dll"
 assert(package.loadlib(path, "pvx_load"))()
@@ -39,6 +40,39 @@ function move_to_world(entity, new_world)
     new_world:add_entity(entity)
 end
 
+function find_waypoints(from_world, to_entity)
+    local destination_world = to_entity.world
+
+    if from_world == destination_world then
+        return {
+            {
+                position = to_entity:get_interact_pos()
+            }
+        }
+    end
+
+    local exits = from_world:get_exits()
+
+    for i, exit in ipairs(exits) do
+        if exit.world == destination_world then
+            return {
+                {
+                    set_proximity = exit.set_human_near_exit,
+                    waypoint_reached = function(entity)
+                        move_to_world(entity, exit.world)
+                    end,
+                    position = exit.position
+                },
+                {
+                    position = to_entity:get_interact_pos()
+                }
+            }
+        end
+    end
+
+    return nil
+end
+
 function bounds_intersect(a, b)
     return a.left <= b.right and
            b.left <= a.right and
@@ -55,52 +89,55 @@ function pos_to_coords(pos)
 end
 
 local houses_per_unit = 0.08
+local trees_per_unit = 0.01
 
 function generate_world(size, world)
     local entities = {}
     local exits = {}
     local world_bounds = {}
 
-    for i=1, size.x * bs * houses_per_unit do
-        function find_free_ran_pos(w, h)
-            function rand_bounds()
-                --local x, y = math.random(-(size.x * bs)/2, (size.x * bs)/2), math.random(-(size.y * bs)/2, (size.y * bs)/2)
-                local x, y = math.random(5, ((size.x + 5) * bs) ), math.random(5, ((size.y + 5) * bs))
-                x = x - x % bs
-                y = y - y % bs
-                local left, top = x - w/2 * bs - bs, y - h * bs - bs
-                local right, bottom = x + w/2 * bs + bs, y + bs + bs
+    function find_free_ran_pos(w, h, padding_x, padding_y)
+        function rand_bounds()
+            padding_x = padding_x or 5
+            padding_y = padding_y or 5
+            local x, y = math.random(-((size.x + padding_x) * bs)/2, ((size.x + padding_x) * bs)/2), math.random(-((size.y + padding_y) * bs)/2, ((size.y + padding_y) * bs)/2)
+            --local x, y = math.random(5, ((size.x + padding_y) * bs) ), math.random(5, ((size.y + size_x) * bs))
+            x = x - x % bs
+            y = y - y % bs
+            local left, top = x - w/2 * bs - bs, y - h * bs - bs
+            local right, bottom = x + w/2 * bs + bs, y + bs + bs
 
-                local bounds = {
-                    left = left, top = top, right = right, bottom = bottom
-                }
+            local bounds = {
+                left = left, top = top, right = right, bottom = bottom
+            }
 
-                return bounds, x, y
-            end
-
-            local bounds, x, y = rand_bounds()
-
-            for i=1,10 do
-                local free = true
-                
-                for _, entity in ipairs(entities) do
-                    if entity.bounds ~= nil then
-                        if bounds_intersect(bounds, entity.bounds) then
-                            bounds, x, y = rand_bounds()
-                            free = false
-                            break
-                        end
-                    end
-                end
-
-                if free == true then
-                    return Vector2(x, y)
-                end
-            end
-
-            return nil
+            return bounds, x, y
         end
 
+        local bounds, x, y = rand_bounds()
+
+        for i=1,10 do
+            local free = true
+            
+            for _, entity in ipairs(entities) do
+                if entity.bounds ~= nil then
+                    if bounds_intersect(bounds, entity.bounds) then
+                        bounds, x, y = rand_bounds()
+                        free = false
+                        break
+                    end
+                end
+            end
+
+            if free == true then
+                return Vector2(x, y)
+            end
+        end
+
+        return nil
+    end
+
+    for i=1, size.x * bs * houses_per_unit do
         local w, h = math.random(7,60), math.random(6, 15)
         local position = find_free_ran_pos(w, h)
 
@@ -136,6 +173,17 @@ function generate_world(size, world)
         end
     end
 
+    for i=1,size.x * bs * trees_per_unit do
+        local position = find_free_ran_pos(2, 2, 20, 20)
+
+        if position ~= nil then
+            local tree_act = TreeAct()
+            local entity = Entity(position, tree_act, world)
+            entity:start()
+            table.insert(entities, entity)
+        end
+    end
+
     return entities, exits, world_bounds
 end
 
@@ -143,7 +191,7 @@ local world_size = Vector2(60, 60)
 
 math.randomseed(os.clock())
 grass_color = {r = 0.443, g = 0.678, b = 0.169 }
-local main_world = World(generate_world, world_size)
+main_world = World(generate_world, world_size)
 local time_multiplier = 100
 local time_per_tick = 1/time_multiplier
 local camera_move_speed = 2000

@@ -1,6 +1,7 @@
 Entity = class(Entity)
 
 Entity.static_init_funcs = {}
+Entity.all_entities = {}
 
 function Entity.static_init()
     for _, init_func in ipairs(Entity.static_init_funcs) do
@@ -24,6 +25,20 @@ function Entity:init(position, act, world)
     self.act.entity = self
     self.bounds = self.act:calc_bounds(position)
     self.started = false
+    table.insert(Entity.all_entities, self)
+end
+
+function Entity:deinit()
+    for i, entity in ipairs(Entity.all_entities) do
+        if entity == self then
+            table.remove(Entity.all_entities, i)
+            break
+        end
+    end
+end
+
+function Entity:set_move_direction(direction)
+    self.move_direction = direction
 end
 
 function Entity:get_bounds()
@@ -82,6 +97,11 @@ function Entity:tick()
     end
 
     self.act:tick()
+
+    if self.move_direction ~= nil then
+        self:set_position(self:get_position() + self.move_direction * self:get_speed())
+        self.move_direction = nil
+    end
 end
 
 function Entity:draw(screen_rect)
@@ -90,6 +110,14 @@ function Entity:draw(screen_rect)
     end
 
     self.act:draw(screen_rect)
+end
+
+function Entity:get_speed()
+    if self.act.get_speed == nil then
+        return 1
+    end
+
+    return self.act:get_speed()
 end
 
 function Entity:left_mouse_clicked(pos)
@@ -114,4 +142,20 @@ function Entity:get_exits()
     end
 
     return self.act:get_exits()
+end
+
+function Entity:get_interact_pos()
+    if self.act.get_interact_pos == nil then
+        return self:get_position()
+    end
+
+    return self.act:get_interact_pos()
+end
+
+function Entity:is_danceable()
+    if self.act.is_danceable == nil then
+        return false
+    end
+
+    return self.act:is_danceable()
 end

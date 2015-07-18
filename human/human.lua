@@ -60,16 +60,33 @@ function HumanAct:calc_bounds(pos)
     }
 end
 
+local generation_properties = {
+    min_restlessness_change_speed = 0.001,
+    max_restlessness_change_speed = 0.1,
+    min_speed = 0.4,
+    max_speed = 1.4
+}
+
+local function get_gen_prop(prop)
+    return math.random(generation_properties["min_" .. prop], generation_properties["max_" .. prop])
+end
+
 function HumanAct:start()
     self.body = bodies[math.random(1, #bodies)]
     self.head = heads[math.random(1, #heads)]
 
     self.data = {
         entity = self.entity,
-        restlessness = 1
+        restlessness = math.random(0, 1),
+        restlessness_change_speed = get_gen_prop("restlessness_change_speed"),
+        speed = get_gen_prop("speed")
     }
 
    enter_state(self.state, self.data)
+end
+
+function HumanAct:get_speed()
+    return self.data.speed
 end
 
 function HumanAct:tick()

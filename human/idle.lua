@@ -13,7 +13,7 @@ function HumanIdleState:tick()
         return HumanFindInterestPointState()
     end
 
-    self.data.restlessness = math.max(0, self.data.restlessness + 0.001)
+    self.data.restlessness = math.max(0, self.data.restlessness + self.data.restlessness_change_speed)
 
     return self
 end

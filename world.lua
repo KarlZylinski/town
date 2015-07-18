@@ -13,10 +13,10 @@ function World:start()
     end
 
     local square_extents = {
-        left = math.floor(self.extents.left / bs - 1),
-        top = math.floor(self.extents.top / bs - 1),
-        right = math.floor(self.extents.right / bs + 1),
-        bottom = math.floor(self.extents.bottom / bs + 1)
+        left = math.floor(self.extents.left / bs - 20),
+        top = math.floor(self.extents.top / bs - 20),
+        right = math.floor(self.extents.right / bs + 20),
+        bottom = math.floor(self.extents.bottom / bs + 20)
     }
 
     for x = square_extents.left, square_extents.right do

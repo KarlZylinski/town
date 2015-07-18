@@ -45,8 +45,8 @@ local function static_init()
         fill_roof = pvx_add_shape(0.4, 0.3, 0.14, square),
         left_side_roof = pvx_add_shape(0.4, 0.3, 0.14, left_side_roof),
         right_side_roof = pvx_add_shape(0.4, 0.3, 0.14, right_side_roof),
-        door = pvx_add_shape(0.1, 0.02, 0.1, square),
-        window = pvx_add_shape(0.5, 0.4, 0.9, square)
+        door = pvx_add_shape(0.3, 0.2, 0.1, square),
+        window = pvx_add_shape(0.6, 0.6, 0.9, square)
     }
 end
 
