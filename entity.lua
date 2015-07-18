@@ -54,12 +54,12 @@ function Entity:set_position(position)
     self.bounds = self.act:calc_bounds(position)
 end
 
-function Entity:is_blocking()
+function Entity:is_blocking(pos)
     if self.act.is_blocking == nil then
         return false
     end
 
-    return self.act:is_blocking()
+    return self.act:is_blocking(pos)
 end
 
 function Entity:start()

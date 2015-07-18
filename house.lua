@@ -132,11 +132,11 @@ function HouseAct:calc_bounds(pos)
 
     for _, block in ipairs(self.blocks) do
         if bounds.left == nil or block.position.x + pos.x < bounds.left then
-            bounds.left = block.position.x + pos.x + 1
+            bounds.left = block.position.x + pos.x
         end
 
         if bounds.top == nil or block.position.y + pos.y < bounds.top then
-            bounds.top = block.position.y + pos.y + 1
+            bounds.top = block.position.y + pos.y
         end
 
         if bounds.right == nil or block.position.x + pos.x + bs > bounds.right then
@@ -148,10 +148,10 @@ function HouseAct:calc_bounds(pos)
         end
     end
 
-    bounds.left = bounds.left - 1
-    bounds.top = bounds.top - 1
-    bounds.right = bounds.right + 1
-    bounds.bottom = bounds.bottom + 1
+    bounds.left = bounds.left
+    bounds.top = bounds.top
+    bounds.right = bounds.right
+    bounds.bottom = bounds.bottom
     return bounds
 end
 
@@ -162,22 +162,40 @@ end
 function HouseAct:start()
     local bounds = self.entity:get_bounds()
     local inside_world_offset = Vector2(bounds.left, bounds.top) - Vector2(bs, 0)
-    self.inside_world = World(function(size, world) return generate_house_world(inside_world_offset, self.placements, shapes, self.entity.world, size, world) end, self.block_size + Vector2(0, -1))
+    self.inside_world = World(function(size, world) return generate_house_world(inside_world_offset, self.placements, shapes, self.entity.world, self, size, world) end, self.block_size + Vector2(0, -1))
     self.inside_world:start()
 end
 
 function HouseAct:tick()
     self.inside_world:tick()
+
+    if self.human_near ~= nil then
+        local exit_pos = self:get_exit_pos()
+        local v = exit_pos - self.human_near:get_position()
+        v.x = v.x*3
+        
+        if (v):len() >= bs * 3 then
+            self.human_near = nil
+        end
+    end
 end
 
 function HouseAct:draw(screen_rect)
-    if self.show_inside then
+    local human_near = self.human_near ~= nil
+    local draw_outside = not self.show_inside
+    local draw_inside = self.show_inside or human_near
+
+    if draw_inside then
         self.inside_world:draw(screen_rect)
-    else
+    end
+
+    if draw_outside then
         local x, y = self.entity:get_position():unpack()
 
         for _, block in ipairs(self.blocks) do
-            pvx_draw_shape(block.shape, x + block.position.x, y + block.position.y)
+            if block.shape ~= shapes.door or not human_near then
+                pvx_draw_shape(block.shape, x + block.position.x, y + block.position.y)
+            end
         end
     end
 end
@@ -190,13 +208,22 @@ function HouseAct:right_mouse_clicked(pos)
     self.show_inside = false
 end
 
-function HouseAct:get_exits()
+function HouseAct:set_human_near_exit(human)
+    self.human_near = human
+end
+
+function HouseAct:get_exit_pos()
     local bounds = self.entity:get_bounds()
+    return Vector2(bounds.left - bs/2 + self.placements.door_x * bs, bounds.bottom)
+end
+
+function HouseAct:get_exits()
     assert(self.inside_world ~= nil)
 
     return {
         {
-            position = Vector2(bounds.left - bs/2 + self.placements.door_x * bs, bounds.bottom),
+            position = self:get_exit_pos(),
+            set_human_near_exit = function(entity) self:set_human_near_exit(entity) end,
             world = self.inside_world
         }
     }
@@ -228,3 +255,7 @@ function HouseAct:find_free_location()
     end
 end
 
+function HouseAct:is_blocking(pos)
+    local entity_bounds = self.entity:get_bounds()
+    return bounds_contains(entity_bounds, pos)
+end

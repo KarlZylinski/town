@@ -13,7 +13,12 @@ function HumanFindInterestPointState:tick()
     local exits = w:get_exits()
 
     if #exits > 0 then
-        return HumanMovingToDoorState(exits[math.random(1, #exits)])
+        local exit = exits[math.random(1, #exits)]
+        local path = w:find_path(self.data.entity:get_position(), exit.position)
+        
+        if path ~= nil then
+            return HumanMovingToDoorState(path, exit.world, exit.set_human_near_exit)
+        end
     end
 
     if self.data.restlessness < 0.2 then

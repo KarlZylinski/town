@@ -24,8 +24,9 @@ local function get_or_add_floor_shape(size)
     return handle
 end
 
-function generate_house_world(position, placements, shapes, parent_world, size, world)
+function generate_house_world(position, placements, shapes, parent_world, house_act, size, world)
     local entities = {}
+    local world_bounds = {}
     local floor_size = size - Vector2(2, 0)
     table.insert(entities, Entity(position + Vector2(bs * 2, bs), FloorAct(get_or_add_floor_shape(floor_size), floor_size), world))
     local l = 1
@@ -69,7 +70,26 @@ function generate_house_world(position, placements, shapes, parent_world, size, 
             local shape = get_shape(Vector2(x, y))
 
             if shape ~= nil then
-                table.insert(entities, Entity(position + Vector2(x, y) * bs, WallAct(shape), world))
+                local entity = Entity(position + Vector2(x, y) * bs, WallAct(shape), world)
+                local entity_bounds = entity:get_bounds()
+
+                if world_bounds.left == nil or entity_bounds.left < world_bounds.left then
+                    world_bounds.left = entity_bounds.left
+                end
+
+                if world_bounds.top == nil or entity_bounds.top < world_bounds.top then
+                    world_bounds.top = entity_bounds.top
+                end
+
+                if world_bounds.right == nil or entity_bounds.right > world_bounds.right then
+                    world_bounds.right = entity_bounds.right
+                end
+
+                if world_bounds.bottom == nil or entity_bounds.bottom > world_bounds.bottom then
+                    world_bounds.bottom = entity_bounds.bottom
+                end
+
+                table.insert(entities, entity)
             end
         end
     end
@@ -79,9 +99,10 @@ function generate_house_world(position, placements, shapes, parent_world, size, 
     local exits = {
         {
             position = Vector2(position.x + bs/2 + placements.door_x * bs, position.y + (size.y + 1) * bs),
+            set_human_near_exit = function(entity) house_act:set_human_near_exit(entity) end,
             world = parent_world
         }
     }
 
-    return entities, exits
+    return entities, exits, world_bounds
 end

@@ -50,18 +50,26 @@ function bounds_contains(b, p)
     return p.x >= b.left and p.y >= b.top and p.x <= b.right and p.y <= b.bottom
 end
 
+function pos_to_coords(pos)
+    return Vector2(math.floor(pos.x / bs), math.floor(pos.y / bs))
+end
+
 local houses_per_unit = 0.08
 
 function generate_world(size, world)
     local entities = {}
     local exits = {}
+    local world_bounds = {}
 
     for i=1, size.x * bs * houses_per_unit do
         function find_free_ran_pos(w, h)
             function rand_bounds()
-                local x, y = math.random(-(size.x * bs)/2, (size.x * bs)/2), math.random(-(size.y * bs)/2, (size.y * bs)/2)
-                local left, top = x - w/2 * bs, y - h * bs
-                local right, bottom = x + w/2 * bs, y + bs
+                --local x, y = math.random(-(size.x * bs)/2, (size.x * bs)/2), math.random(-(size.y * bs)/2, (size.y * bs)/2)
+                local x, y = math.random(5, ((size.x + 5) * bs) ), math.random(5, ((size.y + 5) * bs))
+                x = x - x % bs
+                y = y - y % bs
+                local left, top = x - w/2 * bs - bs, y - h * bs - bs
+                local right, bottom = x + w/2 * bs + bs, y + bs + bs
 
                 local bounds = {
                     left = left, top = top, right = right, bottom = bottom
@@ -106,20 +114,34 @@ function generate_world(size, world)
                 table.insert(exits, exit)
             end
 
+            local entity_bounds = entity:get_bounds()
+
+            if world_bounds.left == nil or entity_bounds.left < world_bounds.left then
+                world_bounds.left = entity_bounds.left
+            end
+
+            if world_bounds.top == nil or entity_bounds.top < world_bounds.top then
+                world_bounds.top = entity_bounds.top
+            end
+
+            if world_bounds.right == nil or entity_bounds.right > world_bounds.right then
+                world_bounds.right = entity_bounds.right
+            end
+
+            if world_bounds.bottom == nil or entity_bounds.bottom > world_bounds.bottom then
+                world_bounds.bottom = entity_bounds.bottom
+            end
+
             table.insert(entities, entity)
         end
     end
 
-    table.sort(entities, function(e1, e2)
-        return e1:get_position().y < e2:get_position().y
-    end)
-
-    return entities, exits
+    return entities, exits, world_bounds
 end
 
-local world_size = Vector2(625, 625)
+local world_size = Vector2(60, 60)
 
-math.randomseed(os.time())
+math.randomseed(os.clock())
 grass_color = {r = 0.443, g = 0.678, b = 0.169 }
 local main_world = World(generate_world, world_size)
 local time_multiplier = 100
@@ -199,10 +221,10 @@ while pvx_is_window_open() do
         }
 
         if left_button_pressed then
-            local intersecting_entity = main_world:get_intersecting_entity(world_pos)
+            local containing_entity = main_world:get_containing_entity(world_pos)
 
-            if intersecting_entity ~= nil then
-                intersecting_entity:left_mouse_clicked(world_pos)
+            if containing_entity ~= nil then
+                containing_entity:left_mouse_clicked(world_pos)
             end
 
             for _, f in ipairs(left_button_pressed_callbacks) do
@@ -211,10 +233,10 @@ while pvx_is_window_open() do
         end
 
         if right_button_pressed then
-            local intersecting_entity = main_world:get_intersecting_entity(world_pos)
+            local containing_entity = main_world:get_containing_entity(world_pos)
 
-            if intersecting_entity ~= nil then
-                intersecting_entity:right_mouse_clicked(world_pos)
+            if containing_entity ~= nil then
+                containing_entity:right_mouse_clicked(world_pos)
             end
 
             for _, f in ipairs(right_button_pressed_callbacks) do
