@@ -19,7 +19,7 @@ function HumanFindInterestPointState:tick()
         local nearest_danceable = nil
         local dist_sq = 10000000000000
 
-        for i, other_entity in pairs(Entity.all_entities) do
+        for i, other_entity in ipairs(main_world.entities) do
             if other_entity:is_danceable() and other_entity ~= self.data.entity then
                 local len = (other_entity:get_position() - entity_pos):len()
 
@@ -30,11 +30,10 @@ function HumanFindInterestPointState:tick()
             end
         end
 
-        print(dist_sq)
         return nearest_danceable
     end
 
-    if self.data.restlessness >= 0.2 then
+    --[[if self.data.tiredness > 0.8 then
         local nearest_danceable = find_nearest_danceable()
 
         if nearest_danceable == nil then
@@ -46,10 +45,20 @@ function HumanFindInterestPointState:tick()
         return HumanProcessWaypointsState(waypoints, function()
             return HumanDancingState(nearest_danceable)
         end)
-    end
+    end--]]
 
-    if self.data.restlessness < 0.2 then
-        return HumanIdleState()
+    if self.data.restlessness > 0.9 then
+        local nearest_danceable = find_nearest_danceable()
+
+        if nearest_danceable == nil then
+            return self
+        end
+
+        local waypoints = find_waypoints(w, nearest_danceable)
+
+        return HumanProcessWaypointsState(waypoints, function()
+            return HumanDancingState(nearest_danceable)
+        end)
     end
 
     return self

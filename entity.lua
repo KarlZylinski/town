@@ -1,7 +1,6 @@
 Entity = class(Entity)
 
 Entity.static_init_funcs = {}
-Entity.all_entities = {}
 
 function Entity.static_init()
     for _, init_func in ipairs(Entity.static_init_funcs) do
@@ -25,16 +24,6 @@ function Entity:init(position, act, world)
     self.act.entity = self
     self.bounds = self.act:calc_bounds(position)
     self.started = false
-    table.insert(Entity.all_entities, self)
-end
-
-function Entity:deinit()
-    for i, entity in ipairs(Entity.all_entities) do
-        if entity == self then
-            table.remove(Entity.all_entities, i)
-            break
-        end
-    end
 end
 
 function Entity:set_move_direction(direction)

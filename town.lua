@@ -4,6 +4,7 @@ require "vector2"
 require "house"
 require "human/human"
 require "tree"
+require "bed"
 
 local path = "pvx.dll"
 assert(package.loadlib(path, "pvx_load"))()
@@ -174,7 +175,7 @@ function generate_world(size, world)
     end
 
     for i=1,size.x * bs * trees_per_unit do
-        local position = find_free_ran_pos(2, 2, 20, 20)
+        local position = find_free_ran_pos(2, 2)
 
         if position ~= nil then
             local tree_act = TreeAct()
@@ -187,7 +188,7 @@ function generate_world(size, world)
     return entities, exits, world_bounds
 end
 
-local world_size = Vector2(60, 60)
+local world_size = Vector2(80, 50)
 
 math.randomseed(os.clock())
 grass_color = {r = 0.443, g = 0.678, b = 0.169 }
@@ -201,7 +202,10 @@ main_world:start()
 
 for _, entity in ipairs(main_world.entities) do
     if is(entity.act, HouseAct) and entity.act.inside_world ~= nil then
-        local human_act = HumanAct()
+        local bed_act = BedAct()
+        local bed = Entity(entity.act:find_free_area_along_wall(Vector2(bs * 1.5, bs * 2)), bed_act, entity.act.inside_world)
+        entity.act.inside_world:add_entity(bed)
+        local human_act = HumanAct(entity)
         local human = Entity(entity.act:find_free_location(), human_act, entity.act.inside_world)
         entity.act.inside_world:add_entity(human)
     end

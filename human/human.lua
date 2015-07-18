@@ -43,8 +43,9 @@ end
 
 Entity.add_static_init_func(static_init)
 
-function HumanAct:init()
-   self.state = HumanIdleState()
+function HumanAct:init(home)
+    self.home = home
+    self.state = HumanIdleState()
 end
 
 function HumanAct:get_size()
@@ -61,10 +62,14 @@ function HumanAct:calc_bounds(pos)
 end
 
 local generation_properties = {
+    min_restlessness_reduce_speed = 0.0001,
+    max_restlessness_reduce_speed = 0.01,
     min_restlessness_change_speed = 0.001,
     max_restlessness_change_speed = 0.1,
     min_speed = 0.4,
-    max_speed = 1.4
+    max_speed = 1.4,
+    max_tiring_speed = 0.01,
+    min_tiring_speed = 0.001
 }
 
 local function get_gen_prop(prop)
@@ -78,7 +83,10 @@ function HumanAct:start()
     self.data = {
         entity = self.entity,
         restlessness = math.random(0, 1),
+        tiredness = math.random(0, 1),
         restlessness_change_speed = get_gen_prop("restlessness_change_speed"),
+        restlessness_reduce_speed = get_gen_prop("restlessness_reduce_speed"),
+        tiring_speed = get_gen_prop("tiring_speed"),
         speed = get_gen_prop("speed")
     }
 
