@@ -35,7 +35,7 @@ function HumanFindInterestPointState:tick()
         return nearest_danceable
     end
 
-    if self.data.partyneed > 0.7 and self.data.tiredness < 0.3 then
+    if math.random(0, 1) == 1 and self.data.partyneed > 0.7 and self.data.tiredness < 0.3 then
         local bar_disk = main_world.bar.act.inside_world.bar_disk
         assert(bar_disk.world == main_world.bar.act.inside_world)
 
@@ -74,7 +74,7 @@ function HumanFindInterestPointState:tick()
         end)
     end
 
-    if self.data.restlessness > 0.9 and self.data.tiredness < 0.4 then
+    if math.random(0, 1) == 1 and self.data.restlessness > 0.7 and self.data.tiredness < 0.3 then
         local nearest_danceable = find_nearest_danceable()
 
         if nearest_danceable == nil then

@@ -29,5 +29,6 @@ function HumanDancingState:tick()
     self.data.entity:set_position(Vector2(x, y))
     self.data.restlessness = math.max(0, self.data.restlessness - self.data.restlessness_change_speed)
     self.data.tiredness = math.max(0, self.data.tiredness + self.data.tiring_speed)
+    self.data.partyneed = math.max(0, self.data.tiredness + self.data.partyneed_speed)
     return self
 end

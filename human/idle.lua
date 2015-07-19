@@ -14,6 +14,7 @@ function HumanIdleState:tick()
     end
 
     self.data.restlessness = math.max(0, self.data.restlessness + self.data.restlessness_change_speed)
+    self.data.partyneed = math.max(0, self.data.partyneed + self.data.partyneed_speed)
     --self.data.tiredness = math.max(0, self.data.tiredness + self.data.tiring_speed * 0.5)
 
     return self

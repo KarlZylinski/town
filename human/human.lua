@@ -151,21 +151,8 @@ function HumanAct:calc_bounds(pos)
     }
 end
 
-local generation_properties = {
-    min_restlessness_reduce_speed = 0.0001,
-    max_restlessness_reduce_speed = 0.01,
-    min_restlessness_change_speed = 0.001,
-    max_restlessness_change_speed = 0.01,
-    min_speed = 0.4,
-    max_speed = 1.4,
-    max_tiring_speed = 0.01,
-    min_tiring_speed = 0.001,
-    min_partyneed_speed = 0.001,
-    max_partyneed_speed = 0.001
-}
-
 local function get_gen_prop(prop)
-    return math.random(generation_properties["min_" .. prop], generation_properties["max_" .. prop])
+    return math.random(human_generation_properties["min_" .. prop], human_generation_properties["max_" .. prop])
 end
 
 function HumanAct:start()

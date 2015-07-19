@@ -23,7 +23,7 @@ function HumanPartyState:tick()
     local y_offset = -math.abs(math.cos(self.start_time) * self.jump_height)
     self.data.entity:set_position(self.pos + Vector2(0, y_offset))
     self.data.restlessness = math.max(0, self.data.restlessness - self.data.restlessness_change_speed)
-    self.data.partyneed = math.max(0, self.data.tiredness - self.data.partyneed_speed)
+    self.data.partyneed = math.max(0, self.data.partyneed - self.data.partyneed_speed)
     self.data.tiredness = math.max(0, self.data.tiredness + self.data.tiring_speed * 0.7)
     return self
 end

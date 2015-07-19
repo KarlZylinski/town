@@ -288,6 +288,10 @@ while pvx_is_window_open() do
     local camera_move_x = 0
     local camera_move_y = 0
 
+    if (frame_dt > 0.33) then
+        frame_dt = 0.33
+    end
+
     if (pvx_key_held("left")) then
         camera_move_x = frame_dt * -camera_move_speed
     end
