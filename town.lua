@@ -176,7 +176,7 @@ function generate_world(size, world)
     end
 
     local bar_size = Vector2(20, 12)
-    local bar_position = find_free_ran_pos(bar_size.x, bar_size.y, true)
+    local bar_position = Vector2(bs * -15, bs * -10)
     local bar_act = HouseAct(bar_size, true)
     local bar = Entity(bar_position, bar_act, world)
     world.bar = bar
@@ -243,7 +243,15 @@ function generate_world(size, world)
     return entities, exits, world_bounds
 end
 
-math.randomseed(os.clock())
+function get_seed()
+    if seed ~= -1 then
+        return seed
+    end
+
+    return os.clock()
+end
+
+math.randomseed(get_seed())
 grass_color = {r = 0.443, g = 0.678, b = 0.169 }
 main_world = World(generate_world, world_size)
 local time_multiplier = 100
