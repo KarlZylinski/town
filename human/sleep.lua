@@ -4,9 +4,11 @@ function HumanSleepState:init()
 end
 
 function HumanSleepState:enter()
+    self.data.entity.act:set_arms_raised(true)
 end
 
 function HumanSleepState:exit()
+    self.data.entity.act:set_arms_raised(false)
 end
 
 function HumanSleepState:tick()

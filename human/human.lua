@@ -4,7 +4,8 @@ HumanAct = class(HumanAct)
 
 local bodies = {}
 local heads = {}
-local shapes = {}
+local left_arms = {}
+local right_arms = {}
 
 local function static_init()
     local bw, bh = bs/4, bs
@@ -17,14 +18,40 @@ local function static_init()
         bw, 0
     }
 
-    local aw = bs/6
-    local al = bs
+    local aw = bs/8
+    local al = bs / 1.5
 
     local left_arm = {
-        0, -bh,
-        -aw * 2, -bh + bs,
-        -aw * 3, -bh + bs - 4,
-        -aw, -bh
+        -bw + aw, -bh,
+        -bw , -bh + al,
+        -bw - aw, -bh + al - 4,
+        -bw, -bh
+    }
+
+    local right_arm = {
+        bw - aw, -bh,
+        bw , -bh + al,
+        bw + aw, -bh + al - 4,
+        bw, -bh
+    }
+
+
+    local ro = 5
+    local rxo = 2
+    local ral = bs / 2
+
+    local left_arm_raised = {
+        -rxo -bw + aw, -bh + ro,
+        -rxo -bw , -bh - ral + ro,
+        -rxo -bw - aw, -bh - ral - 4 + ro,
+        -rxo -bw, -bh + ro
+    }
+
+    local right_arm_raised = {
+        rxo + bw - aw, -bh + ro,
+        rxo + bw , -bh - ral + ro,
+        rxo + bw + aw, -bh - ral - 4 + ro,
+        rxo + bw, -bh + ro
     }
 
     local hs = bs/3-1
@@ -52,13 +79,33 @@ local function static_init()
     }
 
     heads = {
-        pvx_add_shape(0.9, 0.9, 0.8, head),
+        pvx_add_shape(0.9, 0.25, 0.1, head),
         pvx_add_shape(0.15, 0.15, 0.4, head),
         pvx_add_shape(0.8, 0.3, 0.01, head)
     }
 
-    shapes = {
-        pvx_add_shape(0.9, 0, 0, left_arm)
+    left_arms = {
+        pvx_add_shape(0.9, 0, 0, left_arm),
+        pvx_add_shape(0.0, 0.9, 0, left_arm),
+        pvx_add_shape(0.0, 0, 0.9, left_arm)
+    }
+
+    right_arms = {
+        pvx_add_shape(0.9, 0, 0, right_arm),
+        pvx_add_shape(0.0, 0.9, 0, right_arm),
+        pvx_add_shape(0.0, 0, 0.9, right_arm)
+    }
+
+    left_arms_raised = {
+        pvx_add_shape(0.9, 0, 0, left_arm_raised),
+        pvx_add_shape(0.0, 0.9, 0, left_arm_raised),
+        pvx_add_shape(0.0, 0, 0.9, left_arm_raised)
+    }
+
+    right_arms_raised = {
+        pvx_add_shape(0.9, 0, 0, right_arm_raised),
+        pvx_add_shape(0.0, 0.9, 0, right_arm_raised),
+        pvx_add_shape(0.0, 0, 0.9, right_arm_raised)
     }
 end
 
@@ -86,7 +133,7 @@ local generation_properties = {
     min_restlessness_reduce_speed = 0.0001,
     max_restlessness_reduce_speed = 0.01,
     min_restlessness_change_speed = 0.001,
-    max_restlessness_change_speed = 0.1,
+    max_restlessness_change_speed = 0.01,
     min_speed = 0.4,
     max_speed = 1.4,
     max_tiring_speed = 0.01,
@@ -100,6 +147,11 @@ end
 function HumanAct:start()
     self.body = bodies[math.random(1, #bodies)]
     self.head = heads[math.random(1, #heads)]
+    self.left_arm = left_arms[math.random(1, #left_arms)]
+    self.right_arm = right_arms[math.random(1, #right_arms)]
+    self.left_arm_raised = left_arms_raised[math.random(1, #left_arms)]
+    self.right_arm_raised = right_arms_raised[math.random(1, #right_arms)]
+    self.arms_raised = false
 
     self.data = {
         entity = self.entity,
@@ -114,6 +166,10 @@ function HumanAct:start()
    enter_state(self.state, self.data)
 end
 
+function HumanAct:set_arms_raised(raised)
+    self.arms_raised = raised
+end
+
 function HumanAct:get_speed()
     return self.data.speed
 end
@@ -126,6 +182,13 @@ function HumanAct:draw()
     local x, y = self.entity:get_position():unpack()
     pvx_draw_shape(self.body, x, y)
     pvx_draw_shape(self.head, x, y)
-    pvx_draw_shape(shapes.left_arm, x, y)
+
+    if self.arms_raised then
+        pvx_draw_shape(self.left_arm_raised, x, y)
+        pvx_draw_shape(self.right_arm_raised, x, y)
+    else
+        pvx_draw_shape(self.left_arm, x, y)
+        pvx_draw_shape(self.right_arm, x, y)
+    end
 end
 

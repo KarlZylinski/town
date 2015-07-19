@@ -9,9 +9,11 @@ end
 
 function HumanDancingState:enter()
     self.radius = (self.target:get_position() - self.data.entity:get_position()):len()
+    self.data.entity.act:set_arms_raised(true)
 end
 
 function HumanDancingState:exit()
+    self.data.entity.act:set_arms_raised(false)
 end
 
 function HumanDancingState:tick()
@@ -31,6 +33,6 @@ function HumanDancingState:tick()
     end
 
     self.data.restlessness = math.max(0, self.data.restlessness - self.data.restlessness_change_speed)
-    self.data.tiredness = math.max(0, self.data.tiredness + self.data.tiring_speed)
+    self.data.tiredness = math.max(0, self.data.tiredness + self.data.tiring_speed * 0.4)
     return self
 end

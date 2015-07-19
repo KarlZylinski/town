@@ -1,6 +1,7 @@
 require "class"
-require "world"
 require "vector2"
+require "config"
+require "world"
 require "house"
 require "human/human"
 require "tree"
@@ -8,7 +9,7 @@ require "bed"
 
 local path = "pvx.dll"
 assert(package.loadlib(path, "pvx_load"))()
-pvx_init("StadKul", 1280, 720)
+pvx_init(window_title, screen_width, screen_height, fullscreen)
 bs = 32
 Entity.static_init()
 current_tick = 0
@@ -61,7 +62,7 @@ function find_waypoints(from_world, to_entity)
                 {
                     set_proximity = exit.set_human_near_exit,
                     waypoint_reached = function(entity)
-                        move_to_world(entity, exit.world)
+                        move_to_world(entity, destination_world)
                     end,
                     position = exit.position,
                     world = from_world
@@ -194,8 +195,6 @@ function generate_world(size, world)
 
     return entities, exits, world_bounds
 end
-
-local world_size = Vector2(80, 50)
 
 math.randomseed(os.clock())
 grass_color = {r = 0.443, g = 0.678, b = 0.169 }

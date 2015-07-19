@@ -37,6 +37,8 @@ function HumanFindInterestPointState:tick()
     if self.data.tiredness > 0.7 then
         local bed = self.data.entity.act.home.act.inside_world.bed
 
+        assert(bed.world == self.data.entity.act.home.act.inside_world)
+
         if bed == nil then
             return self
         end
@@ -48,7 +50,7 @@ function HumanFindInterestPointState:tick()
         end)
     end
 
-    if self.data.restlessness > 0.9 and self.data.tiredness < 0.5 then
+    if self.data.restlessness > 0.9 and self.data.tiredness < 0.4 then
         local nearest_danceable = find_nearest_danceable()
 
         if nearest_danceable == nil then

@@ -54,6 +54,14 @@ function generate_house_world(position, placements, shapes, parent_world, house_
             return shapes.wall
         end
 
+        if y == b - 1 then
+            for i, window_x in ipairs(placements.windows_x) do
+                if x == window_x then
+                    return shapes.window
+                end
+            end
+        end
+
         if (y == b or y == b - 1) and x ~= placements.door_x then
             return shapes.wall
         end

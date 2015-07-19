@@ -41,11 +41,14 @@ function HumanProcessWaypointsState:tick()
             end
         end
 
-        return function()
-            if current_waypoint.waypoint_reached ~= nil then
+        if current_waypoint.waypoint_reached ~= nil then
+            return function()
                 current_waypoint.waypoint_reached(self.data.entity)
+                return self
             end
-
+        end
+        
+        return function()
             return self
         end
     end

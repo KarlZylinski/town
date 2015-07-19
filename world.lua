@@ -13,10 +13,10 @@ function World:start()
     end
 
     local square_extents = {
-        left = math.floor(self.extents.left / bs - 20),
-        top = math.floor(self.extents.top / bs - 20),
-        right = math.floor(self.extents.right / bs + 20),
-        bottom = math.floor(self.extents.bottom / bs + 20)
+        left = math.floor(self.extents.left / bs - 1),
+        top = math.floor(self.extents.top / bs - 1),
+        right = math.floor(self.extents.right / bs + 1),
+        bottom = math.floor(self.extents.bottom / bs + 1)
     }
 
     for x = square_extents.left, square_extents.right do
@@ -162,7 +162,7 @@ function World:find_path(start_pos, end_pos)
         return nil
     end
 
-    assert(not start_square.is_blocking and not end_square.is_blocking)
+    assert(not end_square.blocking)
 
     function manhattan_distance(from, to)
         local x = Vector2(to.x - from.x, 0):len()

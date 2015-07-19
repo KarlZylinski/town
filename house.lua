@@ -61,8 +61,28 @@ function HouseAct:init(block_size)
     local h = block_size.y
 
     self.placements = {
-        door_x = math.random(3, self.block_size.x - 3)
+        door_x = math.random(3, self.block_size.x - 3),
+        windows_x = {}
     }
+
+    for i = 3, self.block_size.x - 3 do
+        local try_place = math.random(0, 2) == 2
+
+        if try_place and i ~= self.placements.door_x and i ~= self.placements.door_x - 1 and i ~= self.placements.door_x + 1 then
+            local too_close = false
+
+            for _, x in ipairs(self.placements.windows_x) do
+                if x == i or x - 1 == i or x + 1 == i then
+                    too_close = true
+                    break
+                end
+            end
+
+            if not too_close then
+                table.insert(self.placements.windows_x, i)
+            end
+        end
+    end
 
     function get_shape(pos)
         local x = pos.x
@@ -101,16 +121,12 @@ function HouseAct:init(block_size)
             return shapes.door
         end
 
-        if h > 5 and x == 0 and y == math.floor(t + 2) and math.random(0, 1) == 1 then
-            return shapes.window
-        end
-
-        if h > 6 and x == 0 and y == math.floor(t + 2) - 1 then
-            return shapes.window
-        end
-
-        if w > 5 and (x == self.placements.door_x + 3 or x == self.placements.door_x - 3) and y == b - 1 and x ~= r - 1 and x ~= l + 1 then
-            return shapes.window
+        if y == b - 1 then
+            for i, window_x in ipairs(self.placements.windows_x) do
+                if x == window_x then
+                    return shapes.window
+                end
+            end
         end
 
         return shapes.wall
@@ -234,7 +250,7 @@ function HouseAct:find_free_location()
     local entity_bounds = self.entity:get_bounds()
 
     while true do
-        local pos = Vector2(math.random(entity_bounds.left + bs * 2, entity_bounds.right - bs * 2), math.random(entity_bounds.top + bs * 2, entity_bounds.bottom - bs * 2))
+        local pos = Vector2(math.random(entity_bounds.left + bs * 2, entity_bounds.right - bs * 2), math.random(entity_bounds.top + bs * 3, entity_bounds.bottom - bs * 2))
         local inside_entity = self.inside_world:get_containing_entity(pos)
 
         if inside_entity == nil or not inside_entity:is_blocking() then

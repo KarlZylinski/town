@@ -15,10 +15,10 @@ local function static_init()
     local pillow_height = bs / 1.5
 
     local pillow = {
-        pillow_margin, pillow_margin,
-        bed_width - pillow_margin, pillow_margin,
-        bed_width - pillow_margin, pillow_height,
-        pillow_margin, pillow_height
+        pillow_margin + 1, pillow_margin,
+        bed_width - 2 - pillow_margin, pillow_margin,
+        bed_width - 2 - pillow_margin, pillow_height,
+        pillow_margin + 1, pillow_height
     }
 
     local sheet_margin = bs / 8
