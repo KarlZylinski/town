@@ -73,7 +73,7 @@ function World:draw(screen_rect)
     end
 
     table.sort(entities_on_screen, function(e1, e2)
-        return e1:get_position().y < e2:get_position().y
+        return e1:get_sort_key() < e2:get_sort_key()
     end)
 
     for _, entity in ipairs(entities_on_screen) do

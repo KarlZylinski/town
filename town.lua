@@ -210,8 +210,11 @@ main_world:start()
 for _, entity in ipairs(main_world.entities) do
     if is(entity.act, HouseAct) and entity.act.inside_world ~= nil then
         local bed_act = BedAct()
-        local bed = Entity(entity.act:find_free_area_along_wall(Vector2(bs * 1.5, bs * 2)), bed_act, entity.act.inside_world)
+        local bed_pos = entity.act:find_free_area_along_wall(Vector2(bs * 1, bs * 2), true)
+        local bed = Entity(bed_pos, bed_act, entity.act.inside_world)
+        local bed_sheet = Entity(bed_pos, BedSheetAct(), entity.act.inside_world)
         entity.act.inside_world:add_entity(bed)
+        entity.act.inside_world:add_entity(bed_sheet)
         entity.act.inside_world.bed = bed
         local human_act = HumanAct(entity)
         local human = Entity(entity.act:find_free_location(), human_act, entity.act.inside_world)

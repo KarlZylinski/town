@@ -243,7 +243,7 @@ function HouseAct:find_free_location()
 end
 
 
-function HouseAct:find_free_area_along_wall(size)
+function HouseAct:find_free_area_along_wall(size, align)
     local entity_bounds = self.entity:get_bounds()
     local min_y = entity_bounds.top + bs * 2
     local max_y = entity_bounds.bottom - bs * 2 - size.y
@@ -260,6 +260,11 @@ function HouseAct:find_free_area_along_wall(size)
         local function calc()
             local x = get_x(math.random(0, 1) == 1)
             local pos = Vector2(x, math.random(min_y, max_y))
+
+            if align then
+                pos.y = pos.y - pos.y % bs
+            end
+
             return pos
         end
         
