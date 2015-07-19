@@ -3,6 +3,7 @@ require "house_world"
 HouseAct = class(HouseAct)
 
 local shapes = {}
+local bar_shapes = {}
 
 local function static_init()
     local square = {
@@ -49,12 +50,25 @@ local function static_init()
         door = pvx_add_shape(0.3, 0.2, 0.1, square),
         window = pvx_add_shape(0.6, 0.6, 0.9, square)
     }
+
+    bar_shapes = {
+        wall = pvx_add_shape(0.7, 0.3, 0.32, square),
+        inside_wall = pvx_add_shape(0.7, 0.5, 0.32, square),
+        left_side = pvx_add_shape(0.99, 0.99, 0.94, left_side_square),
+        right_side = pvx_add_shape(0.99, 0.99, 0.94, right_side_square),
+        fill_roof = pvx_add_shape(0.12, 0.2, 0.14, square),
+        left_side_roof = pvx_add_shape(0.12, 0.2, 0.14, left_side_roof),
+        right_side_roof = pvx_add_shape(0.12, 0.2, 0.14, right_side_roof),
+        door = pvx_add_shape(0.92, 0.25, 0.1, square),
+        window = pvx_add_shape(0.6, 0.6, 0.9, square)
+    }
 end
 
 Entity.add_static_init_func(static_init)
 
-function HouseAct:init(block_size)
+function HouseAct:init(block_size, is_bar)
     assert(block_size ~= nil)
+    self.is_bar = is_bar
     self.block_size = block_size
     self.blocks = {}
     self.show_inside = false
@@ -84,7 +98,7 @@ function HouseAct:init(block_size)
         end
     end
 
-    function get_shape(pos)
+    function get_shape(shapes, pos)
         local x = pos.x
         local y = pos.y
         local w = block_size.x
@@ -137,7 +151,7 @@ function HouseAct:init(block_size)
             local block_pos = Vector2(x, y)
 
             table.insert(self.blocks, {
-                shape = get_shape(block_pos),
+                shape = get_shape(self:get_shapes(), block_pos),
                 position = (block_pos + Vector2(math.floor(-block_size.x/2), -block_size.y)) * bs
             })
         end
@@ -179,7 +193,7 @@ end
 function HouseAct:start()
     local bounds = self.entity:get_bounds()
     local inside_world_offset = Vector2(bounds.left, bounds.top) - Vector2(bs, 0)
-    self.inside_world = World(function(size, world) return generate_house_world(inside_world_offset, self.placements, shapes, self.entity.world, self, size, world) end, self.block_size + Vector2(0, -1))
+    self.inside_world = World(function(size, world) return generate_house_world(inside_world_offset, self.placements, self:get_shapes(), self.entity.world, self, size, world) end, self.block_size + Vector2(0, -1))
     self.inside_world:start()
 end
 
@@ -195,6 +209,14 @@ function HouseAct:tick()
             self.human_near = nil
         end
     end
+end
+
+function HouseAct:get_shapes()
+    if self.is_bar then
+        return bar_shapes
+    end
+
+    return shapes
 end
 
 function HouseAct:draw(screen_rect)

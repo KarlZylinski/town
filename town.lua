@@ -6,6 +6,7 @@ require "house"
 require "human/human"
 require "tree"
 require "bed"
+require "bar_disk"
 
 local path = "pvx.dll"
 assert(package.loadlib(path, "pvx_load"))()
@@ -146,12 +147,23 @@ function generate_world(size, world)
         return nil
     end
 
+    local bar_size = Vector2(20, 12)
+    local bar_position = find_free_ran_pos(bar_size.x, bar_size.y, true)
+    local bar_act = HouseAct(bar_size, true)
+    local bar = Entity(bar_position, bar_act, world)
+    bar:start()
+    table.insert(entities, bar)
+    local bar_bounds = bar:get_bounds()
+    local bar_disk_pos = Vector2(bar_bounds.left, bar_bounds.top) + Vector2(bs * 4, bs * 4)
+    local bar_disk = Entity(bar_disk_pos, BarDiskAct(), bar.act.inside_world)
+    bar.act.inside_world:add_entity(bar_disk)
+
     for i=1, size.x * bs * houses_per_unit do
         local w, h = math.random(7,20), math.random(7, 13)
         local position = find_free_ran_pos(w, h, true)
 
         if position ~= nil then
-            local house_act = HouseAct(Vector2(w, h), position)
+            local house_act = HouseAct(Vector2(w, h), false)
             local entity = Entity(position, house_act, world)
             entity:start()
             local entity_exits = entity:get_exits()
@@ -207,7 +219,7 @@ local time_last_frame = os.clock()
 main_world:start()
 
 for _, entity in ipairs(main_world.entities) do
-    if is(entity.act, HouseAct) and entity.act.inside_world ~= nil then
+    if is(entity.act, HouseAct) and not entity.act.is_bar and entity.act.inside_world ~= nil then
         local bed_act = BedAct()
         local bed_pos = entity.act:find_free_area_along_wall(Vector2(bs * 1, bs * 2), true)
         local bed = Entity(bed_pos, bed_act, entity.act.inside_world)
