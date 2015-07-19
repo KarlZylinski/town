@@ -234,22 +234,9 @@ function HouseAct:find_free_location()
 
     while true do
         local pos = Vector2(math.random(entity_bounds.left + bs * 2, entity_bounds.right - bs * 2), math.random(entity_bounds.top + bs * 2, entity_bounds.bottom - bs * 2))
-        local blocked = false
+        local inside_entity = self.inside_world:get_containing_entity(pos)
 
-        for _, block in ipairs(self.blocks) do
-            local bounds = {
-                left = block.position.x + entity_bounds.left,
-                top = block.position.y + entity_bounds.top,
-                right = block.position.x + entity_bounds.left + bs,
-                bottom = block.position.y + entity_bounds.top + bs
-            }
-
-            if bounds_contains(bounds, pos) then
-                blocked = true
-            end
-        end 
-
-        if blocked == false then
+        if inside_entity == nil or not inside_entity:is_blocking() then
             return pos
         end
     end
@@ -270,8 +257,23 @@ function HouseAct:find_free_area_along_wall(size)
     end
 
     local function get_bounds_and_pos()
-        local x = get_x(math.random(0, 1) == 1)
-        local pos = Vector2(x, math.random(min_y, max_y))
+        local function calc()
+            local x = get_x(math.random(0, 1) == 1)
+            local pos = Vector2(x, math.random(min_y, max_y))
+            return pos
+        end
+        
+        local exit_pos = self:get_exit_pos()
+        local pos
+        
+        while true do
+            pos = calc()
+            
+            if (exit_pos - pos):len() > bs * 4 then
+                break
+            end
+        end
+
         local bounds = {
             left = pos.x,
             top = pos.y,
@@ -281,38 +283,14 @@ function HouseAct:find_free_area_along_wall(size)
         return bounds, pos
     end
 
-    local bounds, pos = get_bounds_and_pos()
+    while true do
+        local bounds, pos = get_bounds_and_pos()
+        local intersecting_entity = self.inside_world:get_intersecting_entity(bounds)
 
-    for i=1,100 do
-        local blocked = false
-
-        if (bounds.left > self.placements.door_x - bs/2 or bounds.right < self.placements.door_x + bs/2)
-            and entity_bounds.bottom - bounds.bottom < bs then
-            blocked = true
-        end
-
-        for _, block in ipairs(self.blocks) do
-            local block_bounds = {
-                left = block.position.x + entity_bounds.left,
-                top = block.position.y + entity_bounds.top,
-                right = block.position.x + entity_bounds.left + bs,
-                bottom = block.position.y + entity_bounds.top + bs
-            }
-
-            if bounds_intersect(block_bounds, bounds) then
-                blocked = true
-                break
-            end
-        end
-
-        if blocked == false then
-            break
-        else
-            bounds, pos = get_bounds_and_pos()
+        if intersecting_entity == nil or not intersecting_entity:is_blocking() then
+            return pos
         end
     end
-
-    return pos
 end
 
 function HouseAct:is_blocking(pos)

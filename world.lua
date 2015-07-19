@@ -91,6 +91,16 @@ function World:get_containing_entity(pos)
     return nil
 end
 
+function World:get_intersecting_entity(bounds)
+    for _, entity in ipairs(self.entities) do
+        if bounds_intersect(entity:get_bounds(), bounds) then
+            return entity
+        end
+    end
+
+    return nil
+end
+
 function World:add_entity(entity)
     table.insert(self.entities, entity)
 
