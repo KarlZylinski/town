@@ -232,7 +232,7 @@ function HouseAct:draw(screen_rect)
         local x, y = self.entity:get_position():unpack()
 
         for _, block in ipairs(self.blocks) do
-            if block.shape ~= shapes.door or not human_near then
+            if block.shape ~= self:get_shapes().door or not human_near then
                 pvx_draw_shape(block.shape, x + block.position.x, y + block.position.y)
             end
         end
@@ -273,9 +273,9 @@ function HouseAct:find_free_location()
 
     while true do
         local pos = Vector2(math.random(entity_bounds.left + bs * 2, entity_bounds.right - bs * 2), math.random(entity_bounds.top + bs * 3, entity_bounds.bottom - bs * 2))
-        local inside_entity = self.inside_world:get_containing_entity(pos)
+        local inside_entity = self.inside_world:get_containing_blocking_entity(pos)
 
-        if inside_entity == nil or not inside_entity:is_blocking() then
+        if inside_entity == nil then
             return pos
         end
     end

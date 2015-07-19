@@ -46,34 +46,62 @@ end
 function find_waypoints(from_world, to_entity)
     local destination_world = to_entity.world
 
-    if from_world == destination_world then
+    local function get_final_waypoint(world)
         return {
-            {
-                position = to_entity:get_interact_pos(),
-                world = destination_world
-            }
+            position = to_entity:get_interact_pos(),
+            world = world
         }
+    end
+
+    if from_world == destination_world then
+        return { final_waypoint }
+    end
+
+    local function find_transition(world)
+        local exits = world:get_exits()
+
+        for i, exit in ipairs(exits) do
+            if exit.world == destination_world then
+                return {
+                    set_proximity = exit.set_human_near_exit,
+                    waypoint_reached = function(entity)
+                        move_to_world(entity, exit.world)
+                    end,
+                    position = exit.position,
+                    world = world
+                }, exit.world
+            end
+        end
     end
 
     local exits = from_world:get_exits()
 
-    for i, exit in ipairs(exits) do
-        if exit.world == destination_world then
-            return {
-                {
-                    set_proximity = exit.set_human_near_exit,
-                    waypoint_reached = function(entity)
-                        move_to_world(entity, destination_world)
-                    end,
-                    position = exit.position,
-                    world = from_world
-                },
-                {
-                    position = to_entity:get_interact_pos(),
-                    world = destination_world
-                }
-            }
+    -- triple bypass operation
+    if #exits == 1 and exits[1].world ~= destination_world then
+        local exit1 = exits[1]
+
+        local waypoint1 = {
+            set_proximity = exit1.set_human_near_exit,
+            waypoint_reached = function(entity)
+                move_to_world(entity, exit1.world)
+            end,
+            position = exit1.position,
+            world = from_world
+        }
+
+        local waypoint2, waypoint2_world = find_transition(exit1.world)
+
+        if waypoint2 == nil then
+            return nil
         end
+
+        return { waypoint1, waypoint2, get_final_waypoint(waypoint2_world) }
+    end
+
+    local waypoint1, waypoint1_world = find_transition(from_world)
+
+    if waypoint1 ~= nil then
+        return { waypoint1, get_final_waypoint(waypoint1_world) }
     end
 
     return nil
@@ -151,12 +179,19 @@ function generate_world(size, world)
     local bar_position = find_free_ran_pos(bar_size.x, bar_size.y, true)
     local bar_act = HouseAct(bar_size, true)
     local bar = Entity(bar_position, bar_act, world)
+    world.bar = bar
     bar:start()
     table.insert(entities, bar)
     local bar_bounds = bar:get_bounds()
     local bar_disk_pos = Vector2(bar_bounds.left, bar_bounds.top) + Vector2(bs * 4, bs * 4)
     local bar_disk = Entity(bar_disk_pos, BarDiskAct(), bar.act.inside_world)
+    bar_disk:start()
     bar.act.inside_world:add_entity(bar_disk)
+    bar.act.inside_world.bar_disk = bar_disk
+
+    for _, exit in ipairs(bar:get_exits()) do
+        table.insert(exits, exit)
+    end
 
     for i=1, size.x * bs * houses_per_unit do
         local w, h = math.random(7,20), math.random(7, 13)

@@ -1,6 +1,7 @@
 require "human/process_waypoints"
 require "human/dancing"
 require "human/sleep"
+require "human/party"
 
 HumanFindInterestPointState = class(HumanFindInterestPointState)
 
@@ -34,9 +35,28 @@ function HumanFindInterestPointState:tick()
         return nearest_danceable
     end
 
+    if self.data.partyneed > 0.7 and self.data.tiredness < 0.3 then
+        local bar_disk = main_world.bar.act.inside_world.bar_disk
+        assert(bar_disk.world == main_world.bar.act.inside_world)
+
+        if bar_disk == nil then
+            return self
+        end
+
+        local waypoints = find_waypoints(w, bar_disk)
+
+        if waypoints == nil then
+            return self
+        end
+
+        return HumanProcessWaypointsState(waypoints, function()
+            local pa = bar_disk.act:get_party_area()
+            return HumanPartyState(pa)
+        end)
+    end
+
     if self.data.tiredness > 0.7 then
         local bed = self.data.entity.act.home.act.inside_world.bed
-
         assert(bed.world == self.data.entity.act.home.act.inside_world)
 
         if bed == nil then
@@ -44,6 +64,10 @@ function HumanFindInterestPointState:tick()
         end
 
         local waypoints = find_waypoints(w, bed)
+
+        if waypoints == nil then
+            return self
+        end
 
         return HumanProcessWaypointsState(waypoints, function()
             return HumanSleepState()
@@ -58,6 +82,10 @@ function HumanFindInterestPointState:tick()
         end
 
         local waypoints = find_waypoints(w, nearest_danceable)
+
+        if waypoints == nil then
+            return self
+        end
 
         return HumanProcessWaypointsState(waypoints, function()
             return HumanDancingState(nearest_danceable)

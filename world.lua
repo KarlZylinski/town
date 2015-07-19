@@ -22,11 +22,15 @@ function World:start()
     for x = square_extents.left, square_extents.right do
         for y = square_extents.top, square_extents.bottom do
             local pos = Vector2(x * bs + bs / 2, y * bs + bs / 2)
-            local entity = self:get_containing_entity(pos)
-            local blocking = entity ~= nil and entity:is_blocking(pos)
+            local entity = self:get_containing_blocking_entity(pos)
+            local blocking = false
+
+            if entity ~= nil and entity:is_blocking(pos) then
+                blocking = true
+            end
 
             local square = {
-                coords = Vector2(x, y),
+                coords = Vector2(math.floor(x), math.floor(y)),
                 position = pos,
                 blocking = blocking
             }
@@ -84,6 +88,16 @@ end
 function World:get_containing_entity(pos)
     for _, entity in ipairs(self.entities) do
         if entity:contains(pos) then
+            return entity
+        end
+    end
+
+    return nil
+end
+
+function World:get_containing_blocking_entity(pos)
+    for _, entity in ipairs(self.entities) do
+        if entity:contains(pos) and entity:is_blocking(pos) then
             return entity
         end
     end
@@ -165,8 +179,8 @@ function World:find_path(start_pos, end_pos)
     assert(not end_square.blocking)
 
     function manhattan_distance(from, to)
-        local x = Vector2(to.x - from.x, 0):len()
-        local y = Vector2(to.y - from.y, 0):len()
+        local x = to.x - from.x
+        local y = to.y - from.y
         return x + y
     end
 
@@ -176,7 +190,7 @@ function World:find_path(start_pos, end_pos)
         if sq.parent == nil then
             sq.G = 0
         else
-            sq.G = sq.parent.G + (sq.coords - sq.parent.coords):len_sq()
+            sq.G = sq.parent.G + (sq.coords - sq.parent.coords):len()
         end
 
         sq.F = sq.G + sq.H
@@ -188,14 +202,14 @@ function World:find_path(start_pos, end_pos)
     table.insert(open, start_square)
     local closed = {}
     local search_offsets = {
-        Vector2(-1, 0),
-        --Vector2(-1, -1),
         Vector2(0, -1),
-        --Vector2(1, -1),
-        Vector2(1, 0),
-        --Vector2(1, 1),
         Vector2(0, 1),
-        --Vector2(-1, 1)
+        Vector2(-1, 0),
+        Vector2(1, 0)
+        --Vector2(1, 1),
+        --Vector2(-1, 1),
+        --Vector2(-1, -1),
+        --Vector2(1, -1)
     }
 
     function add_to_open(sq)
@@ -227,12 +241,8 @@ function World:find_path(start_pos, end_pos)
         local best_square, idx = open[1], 1
 
         for i, sq in ipairs(open) do
-            if sq ~= best_square and sq.F < best_square.F then
+            if sq.coords ~= best_square.coords and sq.F < best_square.F then
                 best_square, idx = sq, i
-            end
-
-            if sq.coords == end_square.coords then
-                return sq, i
             end
         end
 
@@ -272,7 +282,7 @@ function World:find_path(start_pos, end_pos)
             else
                 local sq = open[idx]
 
-                if current_square.G + (sq.coords - current_square.coords):len_sq() < sq.G then
+                if current_square.G + (sq.coords - current_square.coords):len() < sq.G then
                     reparent_square(sq, current_square)
                 end
             end

@@ -6,6 +6,7 @@ local bodies = {}
 local heads = {}
 local left_arms = {}
 local right_arms = {}
+local shapes = {}
 
 local function static_init()
     local bw, bh = bs/4, bs
@@ -107,6 +108,27 @@ local function static_init()
         pvx_add_shape(0.0, 0.9, 0, right_arm_raised),
         pvx_add_shape(0.0, 0, 0.9, right_arm_raised)
     }
+
+    local gw = 8
+    local gh = 12
+    local ht = 8
+    local hb = 4
+    local hw = 2
+
+    local grog = {
+        0, 0,
+        gw, 0,
+        gw, ht,
+        gw + hw, ht,
+        gw + hw, hb,
+        gw, hb,
+        gw, gh,
+        0, gh
+    }
+
+    shapes = {
+        grog = pvx_add_shape(0.9, 0.8, 0.05, grog)
+    }
 end
 
 Entity.add_static_init_func(static_init)
@@ -137,7 +159,9 @@ local generation_properties = {
     min_speed = 0.4,
     max_speed = 1.4,
     max_tiring_speed = 0.01,
-    min_tiring_speed = 0.001
+    min_tiring_speed = 0.001,
+    min_partyneed_speed = 0.001,
+    max_partyneed_speed = 0.001
 }
 
 local function get_gen_prop(prop)
@@ -147,11 +171,14 @@ end
 function HumanAct:start()
     self.body = bodies[math.random(1, #bodies)]
     self.head = heads[math.random(1, #heads)]
-    self.left_arm = left_arms[math.random(1, #left_arms)]
-    self.right_arm = right_arms[math.random(1, #right_arms)]
-    self.left_arm_raised = left_arms_raised[math.random(1, #left_arms)]
-    self.right_arm_raised = right_arms_raised[math.random(1, #right_arms)]
+    local left_arm_idx = math.random(1, #left_arms)
+    local right_arm_idx = math.random(1, #right_arms)
+    self.left_arm = left_arms[left_arm_idx]
+    self.right_arm = right_arms[right_arm_idx]
+    self.left_arm_raised = left_arms_raised[left_arm_idx]
+    self.right_arm_raised = right_arms_raised[right_arm_idx]
     self.arms_raised = false
+    self.is_partying = false
 
     self.data = {
         entity = self.entity,
@@ -160,6 +187,8 @@ function HumanAct:start()
         restlessness_change_speed = get_gen_prop("restlessness_change_speed"),
         restlessness_reduce_speed = get_gen_prop("restlessness_reduce_speed"),
         tiring_speed = get_gen_prop("tiring_speed"),
+        partyneed_speed = get_gen_prop("partyneed_speed"),
+        partyneed = math.random(0, 1),
         speed = get_gen_prop("speed")
     }
 
@@ -168,6 +197,10 @@ end
 
 function HumanAct:set_arms_raised(raised)
     self.arms_raised = raised
+end
+
+function HumanAct:set_is_partying(partying)
+    self.is_partying = partying
 end
 
 function HumanAct:get_speed()
@@ -183,12 +216,16 @@ function HumanAct:draw()
     pvx_draw_shape(self.body, x, y)
     pvx_draw_shape(self.head, x, y)
 
-    if self.arms_raised then
+    if self.arms_raised or self.is_partying then
         pvx_draw_shape(self.left_arm_raised, x, y)
         pvx_draw_shape(self.right_arm_raised, x, y)
     else
         pvx_draw_shape(self.left_arm, x, y)
         pvx_draw_shape(self.right_arm, x, y)
+    end
+
+    if self.is_partying then
+        pvx_draw_shape(shapes.grog, x - 23, y - 51)
     end
 end
 
