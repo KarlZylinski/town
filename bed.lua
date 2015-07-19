@@ -51,3 +51,7 @@ function BedAct:draw()
     pvx_draw_shape(shapes.base, x, y)
     pvx_draw_shape(shapes.sheet, x, y)
 end
+
+function BedAct:get_interact_pos()
+    return self.entity:get_position() + self:get_size() * 0.5
+end

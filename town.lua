@@ -47,7 +47,8 @@ function find_waypoints(from_world, to_entity)
     if from_world == destination_world then
         return {
             {
-                position = to_entity:get_interact_pos()
+                position = to_entity:get_interact_pos(),
+                world = destination_world
             }
         }
     end
@@ -62,10 +63,12 @@ function find_waypoints(from_world, to_entity)
                     waypoint_reached = function(entity)
                         move_to_world(entity, exit.world)
                     end,
-                    position = exit.position
+                    position = exit.position,
+                    world = from_world
                 },
                 {
-                    position = to_entity:get_interact_pos()
+                    position = to_entity:get_interact_pos(),
+                    world = destination_world
                 }
             }
         end
@@ -97,14 +100,18 @@ function generate_world(size, world)
     local exits = {}
     local world_bounds = {}
 
-    function find_free_ran_pos(w, h, padding_x, padding_y)
+    function find_free_ran_pos(w, h, align)
         function rand_bounds()
             padding_x = padding_x or 5
             padding_y = padding_y or 5
             local x, y = math.random(-((size.x + padding_x) * bs)/2, ((size.x + padding_x) * bs)/2), math.random(-((size.y + padding_y) * bs)/2, ((size.y + padding_y) * bs)/2)
             --local x, y = math.random(5, ((size.x + padding_y) * bs) ), math.random(5, ((size.y + size_x) * bs))
-            x = x - x % bs
-            y = y - y % bs
+            
+            if align then
+                x = x - x % bs
+                y = y - y % bs
+            end
+
             local left, top = x - w/2 * bs - bs, y - h * bs - bs
             local right, bottom = x + w/2 * bs + bs, y + bs + bs
 
@@ -140,7 +147,7 @@ function generate_world(size, world)
 
     for i=1, size.x * bs * houses_per_unit do
         local w, h = math.random(7,60), math.random(6, 15)
-        local position = find_free_ran_pos(w, h)
+        local position = find_free_ran_pos(w, h, true)
 
         if position ~= nil then
             local house_act = HouseAct(Vector2(w, h), position)
@@ -175,7 +182,7 @@ function generate_world(size, world)
     end
 
     for i=1,size.x * bs * trees_per_unit do
-        local position = find_free_ran_pos(2, 2)
+        local position = find_free_ran_pos(2, 2, false)
 
         if position ~= nil then
             local tree_act = TreeAct()
@@ -205,6 +212,7 @@ for _, entity in ipairs(main_world.entities) do
         local bed_act = BedAct()
         local bed = Entity(entity.act:find_free_area_along_wall(Vector2(bs * 1.5, bs * 2)), bed_act, entity.act.inside_world)
         entity.act.inside_world:add_entity(bed)
+        entity.act.inside_world.bed = bed
         local human_act = HumanAct(entity)
         local human = Entity(entity.act:find_free_location(), human_act, entity.act.inside_world)
         entity.act.inside_world:add_entity(human)

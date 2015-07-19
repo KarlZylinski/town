@@ -148,3 +148,11 @@ function Entity:is_danceable()
 
     return self.act:is_danceable()
 end
+
+function Entity:get_sort_key()
+    if self.act.get_sort_key == nil then
+        return self:get_position().y
+    end
+
+    return self.act:get_sort_key()
+end

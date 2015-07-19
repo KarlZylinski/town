@@ -9,7 +9,7 @@ function HumanIdleState:exit()
 end
 
 function HumanIdleState:tick()
-    if self.data.restlessness > 0.9 --[[or self.data.tiredness > 0.8]]then
+    if self.data.restlessness > 0.9 or self.data.tiredness > 0.8 then
         return HumanFindInterestPointState()
     end
 

@@ -23,6 +23,7 @@ function HumanProcessWaypointsState:tick()
 
     local current_waypoint = self.waypoints[1]
     table.remove(self.waypoints, 1)
+    assert(current_world == current_waypoint.world)
     local path = current_world:find_path(self.data.entity:get_position(), current_waypoint.position)
     --[[
     function()

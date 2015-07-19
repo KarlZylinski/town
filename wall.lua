@@ -22,3 +22,8 @@ function WallAct:draw()
     local x, y = self.entity:get_position():unpack()
     pvx_draw_shape(self.shape, x, y)
 end
+
+function WallAct:is_blocking(pos)
+    local entity_bounds = self.entity:get_bounds()
+    return bounds_contains(entity_bounds, pos)
+end

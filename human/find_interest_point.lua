@@ -1,5 +1,6 @@
 require "human/process_waypoints"
 require "human/dancing"
+require "human/sleep"
 
 HumanFindInterestPointState = class(HumanFindInterestPointState)
 
@@ -33,21 +34,21 @@ function HumanFindInterestPointState:tick()
         return nearest_danceable
     end
 
-    --[[if self.data.tiredness > 0.8 then
-        local nearest_danceable = find_nearest_danceable()
+    if self.data.tiredness > 0.7 then
+        local bed = self.data.entity.act.home.act.inside_world.bed
 
-        if nearest_danceable == nil then
+        if bed == nil then
             return self
         end
 
-        local waypoints = find_waypoints(w, nearest_danceable)
+        local waypoints = find_waypoints(w, bed)
 
         return HumanProcessWaypointsState(waypoints, function()
-            return HumanDancingState(nearest_danceable)
+            return HumanSleepState()
         end)
-    end--]]
+    end
 
-    if self.data.restlessness > 0.9 then
+    if self.data.restlessness > 0.9 and self.data.tiredness < 0.5 then
         local nearest_danceable = find_nearest_danceable()
 
         if nearest_danceable == nil then
