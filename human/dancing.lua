@@ -27,12 +27,7 @@ function HumanDancingState:tick()
     local x = math.cos(self.angle) * self.radius + pos.x
     local y = math.sin(self.angle) * self.radius + pos.y + math.cos(self.start_time) * bs/8
     self.data.entity:set_position(Vector2(x, y))
-
-    if self.data.restlessness < 0.2 then
-        return HumanIdleState()
-    end
-
     self.data.restlessness = math.max(0, self.data.restlessness - self.data.restlessness_change_speed)
-    self.data.tiredness = math.max(0, self.data.tiredness + self.data.tiring_speed * 0.4)
+    self.data.tiredness = math.max(0, self.data.tiredness + self.data.tiring_speed)
     return self
 end
