@@ -123,7 +123,7 @@ function pos_to_coords(pos)
 end
 
 local houses_per_unit = 0.08
-local trees_per_unit = 0.01
+local trees_per_unit = 0.02
 
 function generate_world(size, world)
     local entities = {}
@@ -176,7 +176,7 @@ function generate_world(size, world)
     end
 
     local bar_size = Vector2(20, 12)
-    local bar_position = Vector2(bs * -15, bs * -10)
+    local bar_position = find_free_ran_pos(bar_size.x, bar_size.y, true)
     local bar_act = HouseAct(bar_size, true)
     local bar = Entity(bar_position, bar_act, world)
     world.bar = bar
