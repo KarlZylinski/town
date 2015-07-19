@@ -11,7 +11,7 @@ local function static_init()
         0, bed_height
     }
 
-    local pillow_margin = bs / 6
+    local pillow_margin = bs / 7
     local pillow_height = bs / 1.5
 
     local pillow = {

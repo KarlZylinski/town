@@ -58,8 +58,8 @@ function generate_house_world(position, placements, shapes, parent_world, house_
             return shapes.wall
         end
 
-        if y == 1 then
-            return shapes.wall
+        if y == 1 or y == 2 then
+            return shapes.inside_wall
         end
 
         return nil

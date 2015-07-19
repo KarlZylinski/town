@@ -40,6 +40,7 @@ local function static_init()
 
     shapes = {
         wall = pvx_add_shape(0.99, 0.99, 0.94, square),
+        inside_wall = pvx_add_shape(0.8, 0.8, 0.8, square),
         left_side = pvx_add_shape(1, 0.325, 0.123, left_side_square),
         right_side = pvx_add_shape(1, 0.325, 0.123, right_side_square),
         fill_roof = pvx_add_shape(0.4, 0.3, 0.14, square),
@@ -245,7 +246,7 @@ end
 
 function HouseAct:find_free_area_along_wall(size, align)
     local entity_bounds = self.entity:get_bounds()
-    local min_y = entity_bounds.top + bs * 2
+    local min_y = entity_bounds.top + bs * 3
     local max_y = entity_bounds.bottom - bs * 2 - size.y
 
     local function get_x(left_side)

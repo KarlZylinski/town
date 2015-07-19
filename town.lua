@@ -146,7 +146,7 @@ function generate_world(size, world)
     end
 
     for i=1, size.x * bs * houses_per_unit do
-        local w, h = math.random(7,60), math.random(6, 15)
+        local w, h = math.random(7,20), math.random(7, 13)
         local position = find_free_ran_pos(w, h, true)
 
         if position ~= nil then

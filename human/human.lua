@@ -4,6 +4,7 @@ HumanAct = class(HumanAct)
 
 local bodies = {}
 local heads = {}
+local shapes = {}
 
 local function static_init()
     local bw, bh = bs/4, bs
@@ -16,14 +17,31 @@ local function static_init()
         bw, 0
     }
 
-    local hs = bs/4
+    local aw = bs/6
+    local al = bs
+
+    local left_arm = {
+        0, -bh,
+        -aw * 2, -bh + bs,
+        -aw * 3, -bh + bs - 4,
+        -aw, -bh
+    }
+
+    local hs = bs/3-1
     local hyo = 4
 
-    local head = {
+    --[[local head = {
         0, -bh + hyo,
         -hs, -bh - hs + hyo,
         0, -bh - hs * 2 + hyo,
         hs, -bh - hs + hyo
+    }]]
+
+    local head = {
+        -hs/2, -bh,
+        -hs/2, -bh - hs,
+        hs/2, -bh - hs,
+        hs/2, -bh
     }
 
     bodies = {
@@ -35,9 +53,12 @@ local function static_init()
 
     heads = {
         pvx_add_shape(0.9, 0.9, 0.8, head),
-        pvx_add_shape(0.95, 0.9, 0.6, head),
         pvx_add_shape(0.15, 0.15, 0.4, head),
         pvx_add_shape(0.8, 0.3, 0.01, head)
+    }
+
+    shapes = {
+        pvx_add_shape(0.9, 0, 0, left_arm)
     }
 end
 
@@ -105,5 +126,6 @@ function HumanAct:draw()
     local x, y = self.entity:get_position():unpack()
     pvx_draw_shape(self.body, x, y)
     pvx_draw_shape(self.head, x, y)
+    pvx_draw_shape(shapes.left_arm, x, y)
 end
 
